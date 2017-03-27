@@ -121,6 +121,8 @@ import org.semanticweb.owlapi.model.SWRLRule;
 import org.semanticweb.owlapi.model.SWRLSameIndividualAtom;
 import org.semanticweb.owlapi.model.SWRLVariable;
 import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
+import org.semanticweb.owlapi.vocab.OWL2Datatype;
+import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import com.google.common.base.Optional;
 /**OWLClausification.*/
@@ -867,10 +869,11 @@ public class OWLClausification {
         public Object visit(OWLFacetRestriction object) {
             throw new IllegalStateException("Internal error: should not get in here.");
         }
+       private final IRI langString=IRI.create("http://www.w3.org/1999/02/22-rdf-syntax-ns#langString");
         @Override
         public Object visit(OWLLiteral object) {
             try {
-                if (object.isRDFPlainLiteral()) {
+                if (object.isRDFPlainLiteral()||object.getDatatype().getIRI().equals(langString)) {
                     if (object.hasLang())
                         return Constant.create(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf:")+"PlainLiteral");
                     else
@@ -986,7 +989,7 @@ public class OWLClausification {
             m_headAtoms=new ArrayList<>();
             m_bodyAtoms=new ArrayList<>();
             m_abstractVariables=new HashSet<>();
-            OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+            OWLDataFactory factory=OWLManager.getOWLDataFactory();
             for (DescriptionGraph descriptionGraph : descriptionGraphs)
                 for (int i=0;i<descriptionGraph.getNumberOfEdges();i++)
                     m_graphObjectProperties.add(factory.getOWLObjectProperty(IRI.create(descriptionGraph.getEdge(i).getAtomicRole().getIRI())));
