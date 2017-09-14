@@ -17,7 +17,7 @@
 */
 package org.semanticweb.HermiT.datatypes.owlreal;
 
-enum BoundType {
+public enum BoundType {
     INCLUSIVE,EXCLUSIVE;
 
     public BoundType getComplement() {

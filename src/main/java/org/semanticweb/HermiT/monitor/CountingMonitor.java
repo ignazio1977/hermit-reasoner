@@ -478,7 +478,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
         return timeStr;
     }
 
-    private static class TestRecord implements Comparable<TestRecord>, Serializable {
+	public static class TestRecord implements Comparable<TestRecord>, Serializable {
         private static final long serialVersionUID = -3815493500625020183L;
         protected final long m_testTime;
         protected final String m_testDescription;
@@ -495,6 +495,15 @@ public class CountingMonitor extends TableauMonitorAdapter {
             int result=((Long)that.m_testTime).compareTo(m_testTime);
             if (result!=0) return result;
             else return this.m_testDescription.compareToIgnoreCase(that.m_testDescription);
+        }
+        public long getTestTime() {
+            return m_testTime;
+        }
+        public String getTestDescription() {
+            return m_testDescription;
+        }
+        public boolean getTestResult() {
+            return m_testResult;
         }
         @Override
         public String toString() {

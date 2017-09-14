@@ -149,6 +149,22 @@ public class Prefixes implements Serializable {
         }
     }
     /**
+     * Checks whether the given IRI can be expanded
+     */
+    public boolean canBeExpanded(String iri) {
+        if (iri.length()>0 && iri.charAt(0)=='<')
+            return false;
+        else {
+            int pos=iri.indexOf(':');
+            if (pos!=-1) {
+                String prefix=iri.substring(0,pos+1);
+                return m_prefixIRIsByPrefixName.get(prefix)!=null;
+            }
+            else
+                return false;
+        }
+    }
+    /**
      * @param prefixName prefixName
      * @param prefixIRI prefixIRI
      * @return true if modification happened
@@ -179,6 +195,9 @@ public class Prefixes implements Serializable {
      */
     public Map<String,String> getPrefixIRIsByPrefixName() {
         return java.util.Collections.unmodifiableMap(m_prefixIRIsByPrefixName);
+    }
+    public String getPrefixIRI(String prefixName) {
+        return m_prefixIRIsByPrefixName.get(prefixName);
     }
     /**
      * @param prefixIRI prefixIRI
@@ -238,6 +257,20 @@ public class Prefixes implements Serializable {
         buildPrefixIRIMatchingPattern();
         return containsPrefix;
     }
+    /**
+     * Registers all the prefixes from the supplied object.
+     *
+     * @param prefixes          the object from which the prefixes are taken
+     * @return                  'true' if this object already contained one of the prefixes from the supplied object
+     */
+    public boolean addPrefixes(Prefixes prefixes) {
+        boolean containsPrefix=false;
+        for (Map.Entry<String,String> entry : prefixes.m_prefixIRIsByPrefixName.entrySet())
+            if (declarePrefixRaw(entry.getKey(),entry.getValue()))
+                containsPrefix=true;
+        buildPrefixIRIMatchingPattern();
+        return containsPrefix;
+    }
     @Override
     public String toString() {
         return m_prefixIRIsByPrefixName.toString();
@@ -259,7 +292,7 @@ public class Prefixes implements Serializable {
         return s_localNameChecker.matcher(localName).matches();
     }
 
-    private static class ImmutablePrefixes extends Prefixes {
+    public static class ImmutablePrefixes extends Prefixes {
         private static final long serialVersionUID=8517988865445255837L;
 
         public ImmutablePrefixes(Map<String,String> initialPrefixes) {

@@ -20,7 +20,7 @@ package org.semanticweb.HermiT.datatypes.owlreal;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-class Numbers {
+public class Numbers {
     protected enum NumberType {
         INTEGER, LONG, BIG_INTEGER, BIG_DECIMAL, BIG_RATIONAL;
         

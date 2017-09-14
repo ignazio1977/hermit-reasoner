@@ -121,8 +121,6 @@ import org.semanticweb.owlapi.model.SWRLRule;
 import org.semanticweb.owlapi.model.SWRLSameIndividualAtom;
 import org.semanticweb.owlapi.model.SWRLVariable;
 import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
-import org.semanticweb.owlapi.vocab.OWL2Datatype;
-import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import com.google.common.base.Optional;
 /**OWLClausification.*/
@@ -238,7 +236,7 @@ public class OWLClausification {
             DLClause dlClause=clausifier.getDLClause();
             dlClauses.add(dlClause.getSafeVersion(AtomicConcept.THING));
         }
-        NormalizedDataRangeAxiomClausifier normalizedDataRangeAxiomClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,axioms.m_definedDatatypesIRIs);
+        NormalizedDataRangeAxiomClausifier normalizedDataRangeAxiomClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,factory,axioms.m_definedDatatypesIRIs);
         for (OWLDataRange[] inclusion : axioms.m_dataRangeInclusions) {
             for (OWLDataRange description : inclusion)
                 description.accept(normalizedDataRangeAxiomClausifier);
@@ -367,7 +365,6 @@ public class OWLClausification {
             throw new IllegalStateException("Internal error: invalid normal form.");
     }
     protected static Role getRole(OWLObjectPropertyExpression objectPropertyExpression) {
-        objectPropertyExpression=objectPropertyExpression.getSimplified();
         if (objectPropertyExpression instanceof OWLObjectProperty)
             return AtomicRole.create(((OWLObjectProperty)objectPropertyExpression).getIRI().toString());
         else if (objectPropertyExpression instanceof OWLObjectInverseOf) {
@@ -383,7 +380,6 @@ public class OWLClausification {
         return AtomicRole.create(((OWLDataProperty)dataPropertyExpression).getIRI().toString());
     }
     protected static Atom getRoleAtom(OWLObjectPropertyExpression objectProperty,Term first,Term second) {
-        objectProperty=objectProperty.getSimplified();
         if (!objectProperty.isAnonymous()) {
             AtomicRole role=AtomicRole.create(objectProperty.asOWLObjectProperty().getIRI().toString());
             return Atom.create(role,first,second);
@@ -713,12 +709,15 @@ public class OWLClausification {
         protected final Set<String> m_definedDatatypeIRIs;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
+        protected final OWLDataFactory m_factory;
+        protected int m_yIndex;
 
-        public NormalizedDataRangeAxiomClausifier(DataRangeConverter dataRangeConverter,Set<String> definedDatatypeIRIs) {
+        public NormalizedDataRangeAxiomClausifier(DataRangeConverter dataRangeConverter,OWLDataFactory factory,Set<String> definedDatatypeIRIs) {
             m_dataRangeConverter=dataRangeConverter;
             m_definedDatatypeIRIs=definedDatatypeIRIs;
             m_headAtoms=new ArrayList<>();
             m_bodyAtoms=new ArrayList<>();
+            m_factory=factory;
         }
         protected DLClause getDLClause() {
             Atom[] headAtoms=new Atom[m_headAtoms.size()];
@@ -728,7 +727,21 @@ public class OWLClausification {
             DLClause dlClause=DLClause.create(headAtoms,bodyAtoms);
             m_headAtoms.clear();
             m_bodyAtoms.clear();
+            m_yIndex=0;
             return dlClause;
+        }
+        protected void ensureYNotZero() {
+            if (m_yIndex==0)
+                m_yIndex++;
+        }
+        protected Variable nextY() {
+            Variable result;
+            if (m_yIndex==0)
+                result=Y;
+            else
+                result=Variable.create("Y"+m_yIndex);
+            m_yIndex++;
+            return result;
         }
 
         // Various types of descriptions
@@ -746,16 +759,11 @@ public class OWLClausification {
         public void visit(OWLDataUnionOf dr) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
-        private static String datatypeIRI(OWLDataRange r) {
-            if(r.isDatatype()) {
-                return r.asOWLDatatype().getIRI().toString();
-            }
-            return null;
-        }
         @Override
         public void visit(OWLDataComplementOf dr) {
-            String iri=datatypeIRI(dr.getDataRange());
-            if (iri!=null && (Prefixes.isInternalIRI(iri) || m_definedDatatypeIRIs.contains(iri))) {
+            OWLDataRange description=dr.getDataRange();
+            String iri = description.asOWLDatatype().getIRI().toString();
+            if (description.isDatatype() && (Prefixes.isInternalIRI(iri) || m_definedDatatypeIRIs.contains(iri))) {
                 m_bodyAtoms.add(Atom.create(InternalDatatype.create(iri),X));
             }
             else {

@@ -499,7 +499,7 @@ public class InstanceManager {
                     // nothing has been read-off yet
                     initializeSameAs();
                 }
-                readOffClassInstancesByIndividual(monitor, completedSteps, steps);
+                completedSteps=readOffClassInstancesByIndividual(monitor, completedSteps, steps);
                 if (!m_readingOffFoundPossibleConceptInstance && m_usesClassifiedConceptHierarchy)
                     m_realizationCompleted=true;
                 m_classesInitialised=true;
@@ -546,7 +546,7 @@ public class InstanceManager {
                 if (!m_classesInitialised)
                     // nothing has been read-off yet
                     initializeSameAs();
-                completedSteps=readOffPropertyInstancesByIndividual(monitor, completedSteps, steps, startIndividualIndex);
+                completedSteps=readOffPropertyInstancesByIndividual(monitor,completedSteps, steps, startIndividualIndex);
                 if (m_currentIndividualIndex>=m_individuals.length-1) {
                     // we are done now with everything
                     if (!m_readingOffFoundPossiblePropertyInstance)
@@ -560,7 +560,7 @@ public class InstanceManager {
         }
         return completedSteps;
     }
-    protected int readOffPropertyInstancesByIndividual(ReasonerProgressMonitor monitor, int completedSteps, int steps, int startIndividualIndex) {
+    protected int readOffPropertyInstancesByIndividual(ReasonerProgressMonitor monitor,int completedSteps, int steps, int startIndividualIndex) {
         // first round we go over all individuals
         int endIndex=(startIndividualIndex==0) ? m_individuals.length : m_currentIndividualIndex;
         for (int index=startIndividualIndex;index<endIndex;index++) {
@@ -577,7 +577,7 @@ public class InstanceManager {
             }
             // read-off complex role instances only for the slice for which extra axioms have been added
             if (index<m_currentIndividualIndex)
-                completedSteps=readOffComplexRoleSuccessors(ind, monitor, completedSteps, steps);
+                completedSteps=readOffComplexRoleSuccessors(ind,monitor, completedSteps, steps);
             m_interruptFlag.checkInterrupt();
         }
         return completedSteps;

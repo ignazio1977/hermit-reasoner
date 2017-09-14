@@ -137,7 +137,7 @@ public final class GroundDisjunction implements Serializable {
                 break;
             case 3:
                 if (dlPredicate instanceof AnnotatedEquality) {
-                    if (ExtensionManager.containsAnnotatedEquality(getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),getArgument(disjunctIndex,2).getCanonicalNode()))
+                    if (ExtensionManager.containsAnnotatedEquality(getArgument(disjunctIndex,0).getCanonicalNode(), getArgument(disjunctIndex,1).getCanonicalNode(),getArgument(disjunctIndex,2).getCanonicalNode()))
                         return true;
                     break;
                 }

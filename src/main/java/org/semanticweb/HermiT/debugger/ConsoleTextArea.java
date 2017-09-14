@@ -204,6 +204,7 @@ public class ConsoleTextArea extends JTextArea {
                 }
                 string.getChars(0,string.length(),m_buffer,m_firstFreeChar);
                 m_firstFreeChar+=string.length();
+                notifyAll();
             }
         }
         @Override

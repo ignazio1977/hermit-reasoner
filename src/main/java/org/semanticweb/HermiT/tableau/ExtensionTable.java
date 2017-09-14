@@ -27,6 +27,7 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.NegatedAtomicRole;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
+import org.semanticweb.HermiT.tableau.ExtensionTable.View;
 
 /**
  * An extension table keeps track of the assertions in the ABox during a run of
@@ -295,6 +296,7 @@ public abstract class ExtensionTable implements Serializable {
          * @return extension table
          */
         ExtensionTable getExtensionTable();
+        View getExtensionView();
         /**
          * Clear.
          */
@@ -364,6 +366,10 @@ public abstract class ExtensionTable implements Serializable {
         @Override
         public ExtensionTable getExtensionTable() {
             return ExtensionTable.this;
+        }
+        @Override
+        public ExtensionTable.View getExtensionView() {
+            return m_extensionView;
         }
         @Override
         public void clear() {

@@ -44,8 +44,8 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
         Variable Y2 = Variable.create("Y2");
         Variable Y3 = Variable.create("Y3");
         Set<DLClause> dlClauses = new HashSet<>();
-        dlClauses.add(
-                DLClause.create(new Atom[] { Atom.create(A, X), Atom.create(B, X) }, new Atom[] { Atom.create(B, X) }));
+        dlClauses.add(DLClause.create(new Atom[] { Atom.create(A, X), Atom.create(B, X) },
+        new Atom[] { Atom.create(B, X) }));
         dlClauses.add(DLClause.create(new Atom[] { Atom.create(EQ_ONE_R_A, Y1, Y2, X) },
                 new Atom[] { Atom.create(AT_MOST_ONE_R_A, X), Atom.create(R, X, Y1), Atom.create(A, Y1),
                         Atom.create(R, X, Y2), Atom.create(A, Y2) }));

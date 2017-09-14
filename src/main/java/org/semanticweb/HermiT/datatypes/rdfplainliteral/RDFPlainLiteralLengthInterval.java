@@ -19,7 +19,7 @@ package org.semanticweb.HermiT.datatypes.rdfplainliteral;
 
 import java.util.Collection;
 
-class RDFPlainLiteralLengthInterval {
+public class RDFPlainLiteralLengthInterval {
     public static final int CHARACTER_COUNT=1112033;
     public static enum LanguageTagMode { PRESENT,ABSENT }
     

@@ -309,14 +309,21 @@ public final class ExtensionManager implements Serializable {
             return m_ternaryExtensionTable.containsTuple(m_ternaryAuxiliaryTupleContains);
         }
     }
+    public boolean containsAssertion(DLPredicate dlPredicate,Node node0,Node node1,Node node2) {
+        m_fouraryAuxiliaryTupleContains[0]=dlPredicate;
+        m_fouraryAuxiliaryTupleContains[1]=node0;
+        m_fouraryAuxiliaryTupleContains[2]=node1;
+        m_fouraryAuxiliaryTupleContains[3]=node2;
+        return containsTuple(m_fouraryAuxiliaryTupleContains);
+    }
     /**
      * @param node0 node0
      * @param node1 node1
      * @param node2 node2
      * @return true if equality included
      */
-    public static boolean containsAnnotatedEquality(Node node0,Node node1,Node node2) {
-        return NominalIntroductionManager.canForgetAnnotation(node0,node1,node2) && node0==node1;
+    public static boolean containsAnnotatedEquality(Node node0, Node node1,Node node2) {
+        return NominalIntroductionManager.canForgetAnnotation(node0, node1,node2) && node0==node1;
     }
     /**
      * @param tuple tuple
@@ -348,6 +355,28 @@ public final class ExtensionManager implements Serializable {
             return m_binaryExtensionTable.getDependencySet(m_binaryAuxiliaryTupleContains);
         }
     }
+    public DependencySet getDataRangeAssertionDependencySet(DataRange range,Node node) {
+        if (InternalDatatype.RDFS_LITERAL.equals(range))
+            return m_dependencySetFactory.emptySet();
+        else {
+            m_binaryAuxiliaryTupleContains[0]=range;
+            m_binaryAuxiliaryTupleContains[1]=node;
+            return m_binaryExtensionTable.getDependencySet(m_binaryAuxiliaryTupleContains);
+        }
+    }
+    public DependencySet getRoleAssertionDependencySet(Role role,Node nodeFrom,Node nodeTo) {
+        if (role instanceof AtomicRole) {
+            m_ternaryAuxiliaryTupleContains[0]=role;
+            m_ternaryAuxiliaryTupleContains[1]=nodeFrom;
+            m_ternaryAuxiliaryTupleContains[2]=nodeTo;
+        }
+        else {
+            m_ternaryAuxiliaryTupleContains[0]=((InverseRole)role).getInverseOf();
+            m_ternaryAuxiliaryTupleContains[1]=nodeTo;
+            m_ternaryAuxiliaryTupleContains[2]=nodeFrom;
+        }
+        return m_ternaryExtensionTable.getDependencySet(m_ternaryAuxiliaryTupleContains);
+    }
     /**
      * @param dlPredicate dlPredicate
      * @param node node
@@ -373,6 +402,25 @@ public final class ExtensionManager implements Serializable {
             m_ternaryAuxiliaryTupleContains[2]=node1;
             return m_ternaryExtensionTable.getDependencySet(m_ternaryAuxiliaryTupleContains);
         }
+    }
+    public DependencySet getAssertionDependencySet(DLPredicate dlPredicate,Node node0,Node node1,Node node2) {
+        m_fouraryAuxiliaryTupleContains[0]=dlPredicate;
+        m_fouraryAuxiliaryTupleContains[1]=node0;
+        m_fouraryAuxiliaryTupleContains[2]=node1;
+        m_fouraryAuxiliaryTupleContains[3]=node2;
+        return getTupleDependencySet(m_fouraryAuxiliaryTupleContains);
+    }
+    public DependencySet getTupleDependencySet(Object[] tuple) {
+        if (tuple.length==0)
+            return m_clashDependencySet;
+        else
+            return getExtensionTable(tuple.length).getDependencySet(tuple);
+    }
+    public boolean isCore(Object[] tuple) {
+        if (tuple.length==0)
+            return true;
+        else
+            return getExtensionTable(tuple.length).isCore(tuple);
     }
     /**
      * @param concept concept

@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
-class NoNaNDoubleSubset implements ValueSpaceSubset {
+public class NoNaNDoubleSubset implements ValueSpaceSubset {
     protected final List<DoubleInterval> m_intervals;
     
     public NoNaNDoubleSubset() {

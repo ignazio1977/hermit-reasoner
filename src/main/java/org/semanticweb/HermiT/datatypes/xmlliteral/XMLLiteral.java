@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.datatypes.xmlliteral;
 import org.apache.axiom.c14n.impl.Canonicalizer20010315ExclWithComments;
 
 
-class XMLLiteral {
+public class XMLLiteral {
     protected final String m_xml;
 
     public XMLLiteral(String xml) {

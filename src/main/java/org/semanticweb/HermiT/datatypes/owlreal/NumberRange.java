@@ -20,7 +20,7 @@ package org.semanticweb.HermiT.datatypes.owlreal;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-enum NumberRange {
+public enum NumberRange {
     NOTHING,INTEGER,DECIMAL,RATIONAL,REAL;
 
     public boolean isDense() {

@@ -17,7 +17,7 @@
 */
 package org.semanticweb.HermiT.datatypes.binarydata;
 
-class Base64 {
+public class Base64 {
 
     private static final char[] TO_BASE_64= {
         'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',

@@ -181,7 +181,7 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new ValidatedBlockingSignature(this,node);
     }
-    private class ValidatedSingleBlockingObject implements ValidatedBlockingObject {
+    public class ValidatedSingleBlockingObject implements ValidatedBlockingObject {
         protected final Node m_node;
         protected boolean m_hasChangedForBlocking;
         protected boolean m_hasChangedForValidation;

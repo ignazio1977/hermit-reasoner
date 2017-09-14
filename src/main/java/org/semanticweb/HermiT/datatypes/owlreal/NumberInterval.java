@@ -19,7 +19,7 @@ package org.semanticweb.HermiT.datatypes.owlreal;
 
 import java.util.Collection;
 
-class NumberInterval {
+public class NumberInterval {
     protected final NumberRange m_baseRange;
     protected final NumberRange m_excludedRange;
     protected final Number m_lowerBound;

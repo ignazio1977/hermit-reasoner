@@ -231,7 +231,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      */
     public boolean throwInconsistentOntologyException;
     /**prepare reasoner inferences*/
-    public final PrepareReasonerInferences prepareReasonerInferences;
+    public PrepareReasonerInferences prepareReasonerInferences;
 
     /**
      * The default value is false and HermiT will use a specialiased classification strategy for deterministic ontologies, which often is faster, but not always.
@@ -263,8 +263,16 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
     protected void setIndividualReuseStrategyReuseAlways(Set<? extends AtomicConcept> concepts) {
         parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
     }
+    public void loadIndividualReuseStrategyReuseAlways(File file) throws IOException {
+        Set<AtomicConcept> concepts=loadConceptsFromFile(file);
+        setIndividualReuseStrategyReuseAlways(concepts);
+    }
     protected void setIndividualReuseStrategyReuseNever(Set<? extends AtomicConcept> concepts) {
         parameters.put("IndividualReuseStrategy.reuseNever",concepts);
+    }
+    public void loadIndividualReuseStrategyReuseNever(File file) throws IOException {
+        Set<AtomicConcept> concepts=loadConceptsFromFile(file);
+        setIndividualReuseStrategyReuseNever(concepts);
     }
     protected Set<AtomicConcept> loadConceptsFromFile(File file) throws IOException {
         Set<AtomicConcept> result=new HashSet<>();

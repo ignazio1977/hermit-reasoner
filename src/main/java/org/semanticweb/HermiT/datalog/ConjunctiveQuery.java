@@ -13,6 +13,7 @@ import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator.Worker;
 import org.semanticweb.HermiT.tableau.DependencySet;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
+import org.semanticweb.HermiT.tableau.ExtensionTable.View;
 import org.semanticweb.HermiT.tableau.HyperresolutionManager;
 import org.semanticweb.HermiT.tableau.Node;
 
@@ -96,6 +97,10 @@ public class ConjunctiveQuery {
             throw new UnsupportedOperationException();
         }
         @Override
+        public View getExtensionView() {
+            return View.TOTAL;
+        }
+        @Override
         public void clear() {
             throw new UnsupportedOperationException();
         }
@@ -137,7 +142,7 @@ public class ConjunctiveQuery {
         }
     }
     
-    private static class QueryAnswerCallback implements Worker {
+    public static class QueryAnswerCallback implements Worker {
         protected final ConjunctiveQuery m_conjunctiveQuery;
         protected final Map<Node,Term> m_nodesToTerms;
         protected final Term[] m_resultBuffer;
