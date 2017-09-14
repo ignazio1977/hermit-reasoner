@@ -759,11 +759,16 @@ public class OWLClausification {
         public void visit(OWLDataUnionOf dr) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
+        private static String datatypeIRI(OWLDataRange r) {
+            if(r.isDatatype()) {
+                return r.asOWLDatatype().getIRI().toString();
+            }
+            return null;
+        }
         @Override
         public void visit(OWLDataComplementOf dr) {
-            OWLDataRange description=dr.getDataRange();
-            String iri = description.asOWLDatatype().getIRI().toString();
-            if (description.isDatatype() && (Prefixes.isInternalIRI(iri) || m_definedDatatypeIRIs.contains(iri))) {
+            String iri=datatypeIRI(dr.getDataRange());
+            if (iri!=null && (Prefixes.isInternalIRI(iri) || m_definedDatatypeIRIs.contains(iri))) {
                 m_bodyAtoms.add(Atom.create(InternalDatatype.create(iri),X));
             }
             else {
