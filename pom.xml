@@ -25,7 +25,7 @@
 
 	<groupId>net.sourceforge.owlapi</groupId>
 	<artifactId>org.semanticweb.hermit</artifactId>
-	<version>1.4.1.456-SNAPSHOT</version>
+	<version>1.4.1.456</version>
 	<packaging>bundle</packaging>
 
 	<name>HermiT</name>
@@ -128,8 +128,6 @@
 				<version>2.19.1</version>
 				<configuration>
 					<excludes>
-						<!-- structural tests don't work and it's known -->
-						<exclude>**/structural/*java</exclude>
 						<exclude>**/BlockingValidatorTest.java</exclude>
 					</excludes>
 

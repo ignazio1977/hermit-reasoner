@@ -2,6 +2,7 @@ package org.semanticweb.HermiT.structural;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -10,10 +11,6 @@ import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 @SuppressWarnings("javadoc")
 public class NormalizationTest extends AbstractStructuralTest {
-
-    public NormalizationTest(String name) {
-        super(name);
-    }
 
     public void testDataPropertiesHasValue1() throws Exception {
         assertNormalization(
@@ -170,16 +167,21 @@ public class NormalizationTest extends AbstractStructuralTest {
     public void testKeys2() throws Exception {
         Set<String> normalizedAxiomsStrings = getNormalizedAxiomsString(
                 "HasKey(ObjectIntersectionOf(:A :B) (:r) (:dp))");
-        Set<String> control1 = new HashSet<>();
+        Set<String> control1 = new TreeSet<>();
         control1.add("SubClassOf(owl:Thing ObjectUnionOf(<" + NS + "A> ObjectComplementOf(<internal:def#0>)))");
-        control1.add("SubClassOf(owl:Thing ObjectUnionOf(<" + NS + "B> ObjectComplementOf(<internal:def#0>))))");
-        control1.add("HasKey(<internal:def#0> (<" + NS + "r> ) ())");
+        control1.add("SubClassOf(owl:Thing ObjectUnionOf(<" + NS + "B> ObjectComplementOf(<internal:def#0>)))");
+        control1.add("HasKey(<internal:def#0> (<" + NS + "r> ) (<" + NS + "dp> ))");
         Set<String> control2 = new HashSet<>();
         control2.add("SubClassOf(owl:Thing ObjectUnionOf(<" + NS + "B> ObjectComplementOf(<internal:def#0>)))");
         control2.add("SubClassOf(owl:Thing ObjectUnionOf(<" + NS + "A> ObjectComplementOf(<internal:def#0>)))");
-        control2.add("HasKey(<internal:def#0> (<" + NS + "r> ) ())");
+        control2.add("HasKey(<internal:def#0> (<" + NS + "r> ) (<" + NS + "dp> ))");
         if (!normalizedAxiomsStrings.equals(control1) && !normalizedAxiomsStrings.equals(control2))
-            fail();
+            if(!normalizedAxiomsStrings.equals(control1)) {
+                assertEquals(normalizedAxiomsStrings.toString(), control1.toString());
+            }
+        if(!normalizedAxiomsStrings.equals(control2)) {
+            assertEquals(normalizedAxiomsStrings.toString(), control2.toString());
+        }
     }
 
     public void testTopObjectPropertyInSuperPosition() throws Exception {
@@ -213,7 +215,7 @@ public class NormalizationTest extends AbstractStructuralTest {
     protected Set<String> getNormalizedAxiomsString(String axiomsString) throws Exception {
         loadOntologyWithAxioms(axiomsString);
         Set<OWLAxiom> normalizedAxioms = getNormalizedAxioms();
-        Set<String> normalizedAxiomsString = new HashSet<>();
+        Set<String> normalizedAxiomsString = new TreeSet<>();
         for (OWLAxiom axiom : normalizedAxioms)
             normalizedAxiomsString.add(axiom.toString());
         return normalizedAxiomsString;

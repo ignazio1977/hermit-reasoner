@@ -1,6 +1,7 @@
 package org.semanticweb.HermiT.structural;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,10 +24,6 @@ import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.owlapi.model.IRI;
 @SuppressWarnings("javadoc")
 public abstract class AbstractStructuralTest extends AbstractOntologyTest {
-
-    public AbstractStructuralTest(String name) {
-        super(name);
-    }
 
     protected static void assertContainsAll(String testName, Collection<String> actual, String[] control) {
         try {

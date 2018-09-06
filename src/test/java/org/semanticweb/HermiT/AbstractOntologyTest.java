@@ -167,28 +167,6 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         assertTrue(isOK);
     }
 
-    /**
-     * prints the content of control set and the actual set in case they are
-     * different and causes a JUnit test failure
-     */
-    protected <T> void assertEquals(Set<T> actual, Set<T> control) {
-        if (!actual.equals(control)) {
-            System.out.println("Test " + this.getName() + " failed!");
-            System.out.println("Control set (" + control.size() + " elements):");
-            System.out.println("------------------------------------------");
-            for (T object : control)
-                System.out.println(object.toString());
-            System.out.println("------------------------------------------");
-            System.out.println("Actual set (" + actual.size() + " elements):");
-            System.out.println("------------------------------------------");
-            for (Object object : actual)
-                System.out.println(object.toString());
-            System.out.println("------------------------------------------");
-            System.out.flush();
-            assertTrue(false);
-        }
-    }
-
     protected OWLClass C(String uri) {
         return m_dataFactory.getOWLClass(IRI.create(uri));
     }
