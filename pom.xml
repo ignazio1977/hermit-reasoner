@@ -25,7 +25,7 @@
 
 	<groupId>net.sourceforge.owlapi</groupId>
 	<artifactId>org.semanticweb.hermit</artifactId>
-	<version>1.4.1.456</version>
+	<version>1.4.2.456</version>
 	<packaging>bundle</packaging>
 
 	<name>HermiT</name>
@@ -204,6 +204,7 @@
 						<Import-Package>
 							!org.apache.*,
 							!javax.*,
+							javax.xml.stream.*,
 							!org.codehaus.*,
 							!org.jaxen*,
 							org.protege.editor.owl.*;version="4.3",
