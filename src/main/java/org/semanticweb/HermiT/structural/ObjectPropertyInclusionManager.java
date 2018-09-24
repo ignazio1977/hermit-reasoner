@@ -17,9 +17,11 @@
  */
 package org.semanticweb.HermiT.structural;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,7 +55,7 @@ public class ObjectPropertyInclusionManager {
      */
     public ObjectPropertyInclusionManager(OWLAxioms axioms) {
         m_automataByProperty=new HashMap<>();
-        createAutomata(m_automataByProperty,axioms.m_complexObjectPropertyExpressions,axioms.m_simpleObjectPropertyInclusions,axioms.m_complexObjectPropertyInclusions);
+        createAutomata(m_automataByProperty,axioms.m_complexObjectPropertyExpressions,axioms.m_simpleObjectPropertyInclusions,axioms.m_complexObjectPropertyInclusions, axioms.m_explicitInverses);
     }
     /**
      * @param factory factory
@@ -185,10 +187,11 @@ public class ObjectPropertyInclusionManager {
             }
         }
     }
-    protected void createAutomata(Map<OWLObjectPropertyExpression,Automaton> automataByProperty,Set<OWLObjectPropertyExpression> complexObjectPropertyExpressions,Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions) {
+    protected void createAutomata(Map<OWLObjectPropertyExpression,Automaton> automataByProperty,Set<OWLObjectPropertyExpression> complexObjectPropertyExpressions,Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions,
+            Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> explicitInverses) {
         Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> equivalentPropertiesMap=findEquivalentProperties(simpleObjectPropertyInclusions);
         Set<OWLObjectPropertyExpression> symmetricObjectProperties=findSymmetricProperties(simpleObjectPropertyInclusions);
-        Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> inversePropertiesMap=buildInversePropertiesMap(simpleObjectPropertyInclusions);
+        Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> inversePropertiesMap=buildInversePropertiesMap(simpleObjectPropertyInclusions, explicitInverses);
         Graph<OWLObjectPropertyExpression> propertyDependencyGraph=buildPropertyOrdering(simpleObjectPropertyInclusions,complexObjectPropertyInclusions,equivalentPropertiesMap);
         checkForRegularity(propertyDependencyGraph,equivalentPropertiesMap);
 
@@ -245,37 +248,52 @@ public class ObjectPropertyInclusionManager {
             }
         return symmetricProperties;
     }
-    protected Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> buildInversePropertiesMap(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions) {
-        Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> inversePropertiesMap=new HashMap<>();
-        for (OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions)
+    protected Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> buildInversePropertiesMap(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions, Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> explicitInverses) {
+        Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> inversePropertiesMap=new HashMap<>(explicitInverses);
+        // Both inclusions must be found for an inverse relation to be built:
+        // a subproperty of inverse(b)
+        // b subproperty of inverse(a)
+        // implies
+        // a inverseOf b
+
+        // inverse(b) subproperty of a 
+        // inverse(a) subproperty of b
+        // implies
+        // a inverseOf b (commutative, the order is unimportant)
+        List<OWLObjectPropertyExpression[]> inclusionCandidates=new ArrayList<>();
+        for (OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions) {
+            if(isInverseOf( inclusion[0]) ^ isInverseOf(inclusion[1])) {
+                inclusionCandidates.add(inclusion);
+            }
+        }
+        for (OWLObjectPropertyExpression[] inclusion : inclusionCandidates) {
+            OWLObjectPropertyExpression inverse0 = inclusion[0].getInverseProperty();
+            OWLObjectPropertyExpression inverse1 = inclusion[1].getInverseProperty();
             if (inclusion[1] instanceof OWLObjectInverseOf) {
-                Set<OWLObjectPropertyExpression> inverseProperties=inversePropertiesMap.get(inclusion[0]);
-                if (inverseProperties==null)
-                    inverseProperties=new HashSet<>();
-                inverseProperties.add(inclusion[1].getInverseProperty());
-                inversePropertiesMap.put(inclusion[0],inverseProperties);
-                
-                inverseProperties=inversePropertiesMap.get(inclusion[1].getInverseProperty());
-                if (inverseProperties==null)
-                    inverseProperties=new HashSet<>();
-                inverseProperties.add(inclusion[0]);
-                inversePropertiesMap.put(inclusion[1].getInverseProperty(),inverseProperties);
-                
+                if(contains(inclusionCandidates, inverse1, inverse0)) {
+                    inversePropertiesMap.computeIfAbsent(inclusion[0], x->new HashSet<>()).add(inverse1);
+                    inversePropertiesMap.computeIfAbsent(inverse1, x->new HashSet<>()).add(inclusion[0]);
+                }
             }
             else if (inclusion[0] instanceof OWLObjectInverseOf) {
-                Set<OWLObjectPropertyExpression> inverseProperties=inversePropertiesMap.get(inclusion[1]);
-                if (inverseProperties==null)
-                    inverseProperties=new HashSet<>();
-                inverseProperties.add(inclusion[0].getInverseProperty());
-                inversePropertiesMap.put(inclusion[1],inverseProperties);
-                
-                inverseProperties=inversePropertiesMap.get(inclusion[0].getInverseProperty());
-                if (inverseProperties==null)
-                    inverseProperties=new HashSet<>();
-                inverseProperties.add(inclusion[1]);
-                inversePropertiesMap.put(inclusion[0].getInverseProperty(),inverseProperties);
+                if(contains(inclusionCandidates, inverse0, inverse1)) {
+                    inversePropertiesMap.computeIfAbsent(inclusion[1], x->new HashSet<>()).add(inverse0);
+                    inversePropertiesMap.computeIfAbsent(inverse0, x->new HashSet<>()).add(inclusion[1]);
+                }
             }
+        }
         return inversePropertiesMap;
+    }
+    private static boolean isInverseOf(OWLObjectPropertyExpression e) {
+        return e instanceof OWLObjectInverseOf;
+    }
+    private static boolean contains(List<OWLObjectPropertyExpression[]> list, OWLObjectPropertyExpression o1, OWLObjectPropertyExpression o2 ) {
+        for (OWLObjectPropertyExpression[] l : list) {
+            if(l[0].equals(o1) && l[1].equals(o2)) {
+                return true;
+            }
+        }
+        return false;
     }
     protected Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> findEquivalentProperties(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions) {
         Graph<OWLObjectPropertyExpression> propertyDependencyGraph=new Graph<>();
@@ -583,7 +601,7 @@ public class ObjectPropertyInclusionManager {
     protected void automataConnector(Automaton biggerPropertyAutomaton,Automaton smallerPropertyAutomaton,Transition transition) {
         useStandardAutomataConnector(biggerPropertyAutomaton,smallerPropertyAutomaton,transition);
     }
-	protected Set<Transition> deltaToState(Automaton smallerPropertyAutomaton,State state) {
+    protected Set<Transition> deltaToState(Automaton smallerPropertyAutomaton,State state) {
         Set<Transition> incommingTrans=new HashSet<>();
         for (Object transitionObject : smallerPropertyAutomaton.delta()) {
             Transition transition=(Transition)transitionObject;
