@@ -32,7 +32,7 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
                 isOK = true;
                 for (int i = 0; isOK && i < control.length; i++)
                     isOK = actual.contains(control[i]);
-            assertTrue(isOK);
+            assertTrue("Expected \n"+Arrays.toString(control)+ "\n but was \n"+actual.toString(), isOK);
         } catch (AssertionFailedError e) {
             System.out.println("Test " + testName + " failed!");
                 System.out.println("Control set (" + control.length + " elements):");
@@ -98,12 +98,18 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
                 addIRI(individual.getIRI(), individualIRIs);
         prefixes.declareInternalPrefixes(individualIRIs, anonIndividualIRIs);
         prefixes.declareDefaultPrefix(ontologyIRI + "#");
-        for (DLClause dlClause : dlOntology.getDLClauses())
-            actualStrings.add(toOrderedString(dlClause, prefixes));
-        for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getPositiveFacts())
-            actualStrings.add(atom.toString(prefixes));
-        for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getNegativeFacts())
-            actualStrings.add("not " + atom.toString(prefixes));
+        for (DLClause dlClause : dlOntology.getDLClauses()) {
+            String orderedString = toOrderedString(dlClause, prefixes);
+            actualStrings.add(orderedString);
+        }
+        for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getPositiveFacts()) {
+            String string = atom.toString(prefixes);
+            actualStrings.add(string);
+        }
+        for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getNegativeFacts()) {
+            String e = "not " + atom.toString(prefixes);
+            actualStrings.add(e);
+        }
         return actualStrings;
     }
 

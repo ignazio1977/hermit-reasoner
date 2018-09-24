@@ -50,7 +50,11 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"Peter\"^^xsd:string \"19\"^^xsd:integer)))";
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
-        assertContainsAll(this.getName(), clauses, S("{ \"19\"^^xsd:integer \"Peter\"^^xsd:string }(Y) :- :A(X), :dp(X,Y)"));
+        assertContainsAll(this.getName(), clauses, S("{ "
+                + "\"19\"^^xsd:integer"
+                + " "
+                + "\"Peter\"^^xsd:string"
+                + " }(Y) :- :A(X), :dp(X,Y)"));
     }
 
     public void testDataPropertiesDataOneOf2() throws Exception {
@@ -66,14 +70,22 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
         assertContainsAll(this.getName(), clauses,
-                S(":A(X) v atLeast(1 :dp not({ \"18\"^^xsd:integer \"abc\"^^xsd:string }))(X) :- owl:Thing(X)"));
+                S(":A(X) v atLeast(1 :dp not({ "
+                        + "\"18\"^^xsd:integer"
+                        + " "
+                        + "\"abc\"^^xsd:string"
+                        + " }))(X) :- owl:Thing(X)"));
     }
 
     public void testDataPropertiesDataOneOf4() throws Exception {
         String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"18\"^^xsd:integer \"abc\"^^xsd:string)))";
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
-        assertContainsAll(this.getName(), clauses, S("{ \"18\"^^xsd:integer \"abc\"^^xsd:string }(Y) :- :A(X), :dp(X,Y)"));
+        assertContainsAll(this.getName(), clauses, S("{ "
+                + "\"18\"^^xsd:integer"
+                + " "
+                + "\"abc\"^^xsd:string"
+                + " }(Y) :- :A(X), :dp(X,Y)"));
     }
 
     public void testDataPropertiesDataComplementOf1() throws Exception {
@@ -245,15 +257,25 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
         assertContainsAll(this.getName(), clauses,
-                S("not({ \"5\"^^xsd:integer })(X) v not({ \"5\"^^xsd:nonNegativeInteger \"4.3\"^^xsd:double })(X) :- defdata:0(X)",
-                        "defdata:0(Y) :- :dp(X,Y)"));
+                S("defdata:0(Y) :- :dp(X,Y)",
+                        "not({ "
+                                + "\"4.3\"^^xsd:double"
+                        + " \"5\"^^xsd:nonNegativeInteger"
+                        + " })(X)"
+                        + " v "                        +
+                        "not({ \"5\"^^xsd:integer })(X)"
+                        + " :- defdata:0(X)"));
     }
 
     public void testDataComplementOf4() throws Exception {
         String axioms = "SubClassOf(DataAllValuesFrom(:dp DataComplementOf(DataIntersectionOf(DataOneOf(\"5\"^^xsd:nonNegativeInteger \"4.3\"^^xsd:double) DataOneOf(\"5\"^^xsd:integer)))) :A)";
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
-        assertContainsAll(this.getName(), clauses, S("{ \"5\"^^xsd:nonNegativeInteger \"4.3\"^^xsd:double }(X) :- defdata:0(X)",
+        assertContainsAll(this.getName(), clauses, S("{ "
+                + "\"4.3\"^^xsd:double"
+                + " "
+                + "\"5\"^^xsd:nonNegativeInteger"
+                + " }(X) :- defdata:0(X)",
                 "{ \"5\"^^xsd:integer }(X) :- defdata:0(X)", ":A(X) v atLeast(1 :dp defdata:0)(X) :- owl:Thing(X)"));
     }
 }
