@@ -203,6 +203,7 @@
 						</Export-Package>
 						<Import-Package>
 							!org.apache.*,
+							!gnu.getopt,
 							!javax.*,
 							javax.xml.stream.*,
 							!org.codehaus.*,
@@ -292,6 +293,11 @@
 					<groupId>net.sourceforge.owlapi</groupId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>gnu.getopt</groupId>
+			<artifactId>java-getopt</artifactId>
+			<version>1.0.13</version>
 		</dependency>
 	</dependencies>
 
