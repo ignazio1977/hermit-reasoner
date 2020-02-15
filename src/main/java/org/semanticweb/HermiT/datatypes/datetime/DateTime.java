@@ -38,7 +38,7 @@ public class DateTime {
         ":"+
         TWO_DIGITS+
         ":"+
-        TWO_DIGITS+"([.]([0-9]{1,3}))?"+
+        TWO_DIGITS+"([.]([0-9]{1,3})[0-9]*)?"+
         "((Z)|(([+]|-)"+TWO_DIGITS+":"+TWO_DIGITS+"))?"
     );
     // according to XML Schema 1.1 spec (http://www.w3.org/TR/xmlschema11-2/#dateTime) the reg exp is as follows:
@@ -149,7 +149,7 @@ public class DateTime {
                 day=daysInMonth(year,month);
             }
         }
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         appendPadded(buffer,year,4);
         buffer.append('-');
         appendPadded(buffer,month,2);
@@ -204,7 +204,7 @@ public class DateTime {
     public int getTimeZoneOffset() {
         return m_timeZoneOffset;
     }
-    protected void appendPadded(StringBuffer buffer,int value,int digits) {
+    protected void appendPadded(StringBuilder buffer,int value,int digits) {
         if (value<0)
             buffer.append('-');
         String stringAbsValue=String.valueOf(Math.abs(value));
