@@ -171,9 +171,7 @@ public class OWLClausification {
      * @return dl ontology
      */
     public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,OWLAxiomsExpressivity axiomsExpressivity,Collection<DescriptionGraph> descriptionGraphs) {
-        Set<DLClause> dlClauses=new LinkedHashSet<>();
-        Set<Atom> positiveFacts=new HashSet<>();
-        Set<Atom> negativeFacts=new HashSet<>();
+        List<DLClause> dlClauses=new ArrayList<>();
         Set<DatatypeRestriction> allUnknownDatatypeRestrictions=new HashSet<>();
         for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions) {
             Atom subRoleAtom=getRoleAtom(inclusion[0],X,Y);
@@ -225,6 +223,9 @@ public class OWLClausification {
                     DLClause dlClause=DLClause.create(new Atom[] { atom_ij },new Atom[] { atom_i,atom_j });
                     dlClauses.add(dlClause);
                 }
+
+        Set<Atom> positiveFacts=new HashSet<>();
+        Set<Atom> negativeFacts=new HashSet<>();
         DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_definedDatatypesIRIs,allUnknownDatatypeRestrictions,m_configuration.ignoreUnsupportedDatatypes);
         NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts);
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions) {
@@ -271,6 +272,8 @@ public class OWLClausification {
         // Clausify SWRL rules
         if (!axioms.m_rules.isEmpty())
             new NormalizedRuleClausifier(axioms.m_objectPropertiesOccurringInOWLAxioms,descriptionGraphs,dataRangeConverter,dlClauses).processRules(axioms.m_rules);
+      //drop duplicates
+        dlClauses=new ArrayList<>(new LinkedHashSet<>(dlClauses));
         // Create the DL ontology
         return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,atomicObjectRoles,complexObjectRoles,atomicDataRoles,allUnknownDatatypeRestrictions,axioms.m_definedDatatypesIRIs,individuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
     }
@@ -984,7 +987,7 @@ public class OWLClausification {
     protected static final class NormalizedRuleClausifier implements SWRLObjectVisitorEx<Atom> {
         protected final Set<OWLObjectProperty> m_objectPropertiesOccurringInOWLAxioms;
         protected final DataRangeConverter m_dataRangeConverter;
-        protected final Set<DLClause> m_dlClauses;
+        protected final Collection<DLClause> m_dlClauses;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
         protected final Set<Variable> m_abstractVariables;
@@ -994,7 +997,7 @@ public class OWLClausification {
         protected boolean m_containsNonGraphObjectProperties;
         protected boolean m_containsUndeterminedObjectProperties;
 
-        public NormalizedRuleClausifier(Set<OWLObjectProperty> objectPropertiesOccurringInOWLAxioms,Collection<DescriptionGraph> descriptionGraphs,DataRangeConverter dataRangeConverter,Set<DLClause> dlClauses) {
+        public NormalizedRuleClausifier(Set<OWLObjectProperty> objectPropertiesOccurringInOWLAxioms,Collection<DescriptionGraph> descriptionGraphs,DataRangeConverter dataRangeConverter,Collection<DLClause> dlClauses) {
             m_objectPropertiesOccurringInOWLAxioms=objectPropertiesOccurringInOWLAxioms;
             m_dataRangeConverter=dataRangeConverter;
             m_dlClauses=dlClauses;
