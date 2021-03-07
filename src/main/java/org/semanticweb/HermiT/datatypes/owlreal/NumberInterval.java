@@ -19,6 +19,9 @@ package org.semanticweb.HermiT.datatypes.owlreal;
 
 import java.util.Collection;
 
+/**
+ * Numeric interval.
+ */
 public class NumberInterval {
     protected final NumberRange m_baseRange;
     protected final NumberRange m_excludedRange;
@@ -27,6 +30,14 @@ public class NumberInterval {
     protected final Number m_upperBound;
     protected final BoundType m_upperBoundType;
     
+    /**
+     * @param baseRange range
+     * @param excludedRange exclusion
+     * @param lowerBound lower bound
+     * @param lowerBoundType lower type
+     * @param upperBound upper bound
+     * @param upperBoundType upper type
+     */
     public NumberInterval(NumberRange baseRange,NumberRange excludedRange,Number lowerBound,BoundType lowerBoundType,Number upperBound,BoundType upperBoundType) {
         assert !isIntervalEmpty(baseRange,excludedRange,lowerBound,lowerBoundType,upperBound,upperBoundType);
         m_baseRange=baseRange;
@@ -139,6 +150,10 @@ public class NumberInterval {
             return Numbers.subtractIntegerIntervalSizeFrom(m_lowerBound,m_upperBound,argument);
         }
     }
+    /**
+     * @param number number to check
+     * @return true if contained
+     */
     public boolean containsNumber(Number number) {
         NumberRange mostSpecificRange=NumberRange.getMostSpecificRange(number);
         if (!NumberRange.isSubsetOf(mostSpecificRange,m_baseRange) || NumberRange.isSubsetOf(mostSpecificRange,m_excludedRange))
@@ -147,10 +162,11 @@ public class NumberInterval {
         if (lowerBoundComparison>0 || (lowerBoundComparison==0 && m_lowerBoundType==BoundType.EXCLUSIVE))
             return false;
         int upperBoundComparison=Numbers.compare(m_upperBound,number);
-        if (upperBoundComparison<0 || (upperBoundComparison==0 && m_upperBoundType==BoundType.EXCLUSIVE))
-            return false;
-        return true;
+        return !(upperBoundComparison<0 || (upperBoundComparison==0 && m_upperBoundType==BoundType.EXCLUSIVE));
     }
+    /**
+     * @param numbers collection to add to
+     */
     public void enumerateNumbers(Collection<Object> numbers) {
         if (m_lowerBound.equals(m_upperBound)) {
             // The interval is not empty, and we know that it is not empty; hence, it is a singleton.
@@ -204,7 +220,7 @@ public class NumberInterval {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append(m_baseRange.toString());
         if (m_excludedRange!=NumberRange.NOTHING) {
             buffer.append('\\');

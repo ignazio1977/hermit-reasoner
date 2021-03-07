@@ -18,6 +18,7 @@
 package org.semanticweb.HermiT.datatypes.floatnum;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -36,13 +37,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset FLOAT_ENTIRE=new EntireFloatSubset();
     protected static final ValueSpaceSubset EMPTY_SUBSET=new EmptyFloatSubset();
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_FLOAT);
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<>();
-    static {
-        s_supportedFacetURIs.add(XSD_NS+"minInclusive");
-        s_supportedFacetURIs.add(XSD_NS+"minExclusive");
-        s_supportedFacetURIs.add(XSD_NS+"maxInclusive");
-        s_supportedFacetURIs.add(XSD_NS+"maxExclusive");
-    }
+    protected static final Set<String> s_supportedFacetURIs=new HashSet<>(Arrays.asList(XSD_NS+"minInclusive",XSD_NS+"minExclusive",XSD_NS+"maxInclusive",XSD_NS+"maxExclusive"));
 
     @Override
     public Set<String> getManagedDatatypeURIs() {
@@ -52,11 +47,11 @@ public class FloatDatatypeHandler implements DatatypeHandler {
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert XSD_FLOAT.equals(datatypeURI);
         try {
-            return Float.parseFloat(lexicalForm);
+            return Float.valueOf(lexicalForm);
         }
         catch (NumberFormatException error) {
-            if (lexicalForm.equals("INF")) return Float.POSITIVE_INFINITY;
-            if (lexicalForm.equals("-INF")) return Float.NEGATIVE_INFINITY;
+            if (lexicalForm.equals("INF")) return Float.valueOf(Float.POSITIVE_INFINITY);
+            if (lexicalForm.equals("-INF")) return Float.valueOf(Float.NEGATIVE_INFINITY);
             throw new MalformedLiteralException(lexicalForm,datatypeURI,error);
         }
     }
@@ -169,7 +164,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
         float upperBoundInclusive=Float.POSITIVE_INFINITY;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            float facetDataValue=(Float)datatypeRestriction.getFacetValue(index).getDataValue();
+            float facetDataValue=((Float)datatypeRestriction.getFacetValue(index).getDataValue()).floatValue();
             if ((XSD_NS+"minInclusive").equals(facetURI)) {
                 if (FloatInterval.areIdentical(facetDataValue,+0.0F))
                     facetDataValue=-0.0F;

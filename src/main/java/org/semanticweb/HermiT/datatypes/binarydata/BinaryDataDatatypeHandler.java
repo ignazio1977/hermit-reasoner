@@ -18,6 +18,7 @@
 package org.semanticweb.HermiT.datatypes.binarydata;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,17 +40,8 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset HEX_BINARY_ALL=new BinaryDataValueSpaceSubset(new BinaryDataLengthInterval(BinaryDataType.HEX_BINARY,0,Integer.MAX_VALUE));
     protected static final ValueSpaceSubset BASE_64_BINARY_ALL=new BinaryDataValueSpaceSubset(new BinaryDataLengthInterval(BinaryDataType.BASE_64_BINARY,0,Integer.MAX_VALUE));
     protected static final ValueSpaceSubset EMPTY=new BinaryDataValueSpaceSubset();
-    protected static final Set<String> s_managedDatatypeURIs=new HashSet<>();
-    static {
-        s_managedDatatypeURIs.add(XSD_HEX_BINARY);
-        s_managedDatatypeURIs.add(XSD_BASE_64_BINARY);
-    }
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<>();
-    static {
-        s_supportedFacetURIs.add(XSD_NS+"minLength");
-        s_supportedFacetURIs.add(XSD_NS+"maxLength");
-        s_supportedFacetURIs.add(XSD_NS+"length");
-    }
+    protected static final Set<String> s_managedDatatypeURIs=new HashSet<>(Arrays.asList(XSD_HEX_BINARY, XSD_BASE_64_BINARY));
+    protected static final Set<String> s_supportedFacetURIs=new HashSet<>(Arrays.asList(XSD_NS+"minLength", XSD_NS+"maxLength", XSD_NS+"length"));
 
     @Override
     public Set<String> getManagedDatatypeURIs() {
@@ -79,7 +71,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
             Object facetDataValue=datatypeRestriction.getFacetValue(index).getDataValue();
             if (!(facetDataValue instanceof Integer))
                 throw new UnsupportedFacetException("The binary datatypes accept only integers as facet values, but for the facet with URI '"+facetURI+"' there is a non-integer value "+facetDataValue+" in the datatype restriction "+this.toString()+". ");
-            int value=(Integer)facetDataValue;
+            int value=((Integer)facetDataValue).intValue();
             if (value<0 || value==Integer.MAX_VALUE)
                 throw new UnsupportedFacetException("The datatype restriction "+this.toString()+" cannot be handled. The facet with URI '"+facetURI+"' does not support integer "+value+" as value. "+(value<0?"The value should not be negative. ":"The value is outside of the supported integer range, i.e., it is larger than "+Integer.MAX_VALUE));
         }
@@ -88,16 +80,19 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         String datatypeURI=datatypeRestriction.getDatatypeURI();
         assert s_managedDatatypeURIs.contains(datatypeURI);
-        if (datatypeRestriction.getNumberOfFacetRestrictions()==0)
-            if (XSD_HEX_BINARY.equals(datatypeURI))
+        if (datatypeRestriction.getNumberOfFacetRestrictions()==0) {
+            if (XSD_HEX_BINARY.equals(datatypeURI)) {
                 return HEX_BINARY_ALL;
-            else
+            } else {
                 return BASE_64_BINARY_ALL;
+            }
+        }
         BinaryDataLengthInterval interval=getIntervalFor(datatypeRestriction);
-        if (interval==null)
+        if (interval==null) {
             return EMPTY;
-        else
+        } else {
             return new BinaryDataValueSpaceSubset(interval);
+        }
     }
     @Override
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
@@ -173,7 +168,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
         int maxLength=Integer.MAX_VALUE;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            int facetDataValue=(Integer)datatypeRestriction.getFacetValue(index).getDataValue();
+            int facetDataValue=((Integer)datatypeRestriction.getFacetValue(index).getDataValue()).intValue();
             if ((XSD_NS+"minLength").equals(facetURI))
                 minLength=Math.max(minLength,facetDataValue);
             else if ((XSD_NS+"maxLength").equals(facetURI))

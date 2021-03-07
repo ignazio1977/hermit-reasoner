@@ -142,6 +142,9 @@ public class ConjunctiveQuery {
         }
     }
     
+    /**
+     * Query answr callback.
+     */
     public static class QueryAnswerCallback implements Worker {
         protected final ConjunctiveQuery m_conjunctiveQuery;
         protected final Map<Node,Term> m_nodesToTerms;
@@ -150,6 +153,14 @@ public class ConjunctiveQuery {
         protected final int[][] m_copyAnswers;
         protected final Object[] m_valuesBuffer;
         
+        /**
+         * @param conjunctiveQuery query
+         * @param nodesToTerms nodes to terms
+         * @param resultBuffer results
+         * @param queryResultCollector collector
+         * @param copyAnswers answers
+         * @param valuesBuffer value buffer
+         */
         public QueryAnswerCallback(ConjunctiveQuery conjunctiveQuery,Map<Node,Term> nodesToTerms,Term[] resultBuffer,QueryResultCollector[] queryResultCollector,int[][] copyAnswers,Object[] valuesBuffer) {
             m_conjunctiveQuery=conjunctiveQuery;
             m_nodesToTerms=nodesToTerms;

@@ -129,6 +129,11 @@ public class Graph<T> implements Serializable, Cloneable {
             m_successorsByNodes.remove( element );
         }
     }
+    /**
+     * @param fromNode from
+     * @param toNode to
+     * @return true if successor
+     */
     public boolean isReachableSuccessor(T fromNode,T toNode) {
 		if (fromNode.equals(toNode))
 			return true;
@@ -162,7 +167,7 @@ public class Graph<T> implements Serializable, Cloneable {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         for (T element : m_elements) {
             buffer.append(element.toString());
             buffer.append(" -> { ");

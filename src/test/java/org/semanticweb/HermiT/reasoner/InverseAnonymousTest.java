@@ -12,7 +12,6 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 public class InverseAnonymousTest {
     String input = "Prefix: : <http://example.org/>\n" + "        Ontology: <http://asdf>\n"

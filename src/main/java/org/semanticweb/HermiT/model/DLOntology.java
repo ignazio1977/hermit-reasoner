@@ -89,7 +89,7 @@ public class DLOntology implements Serializable {
         m_hasNominals=hasNominals;
         m_hasDatatypes=hasDatatypes;
         if (atomicConcepts==null)
-            m_allAtomicConcepts=new TreeSet<>(AtomicConceptComparator.INSTANCE);
+            m_allAtomicConcepts=new TreeSet<>(Comparator.comparing(AtomicConcept::getIRI));
         else
             m_allAtomicConcepts=atomicConcepts;
         int numberOfExternalConcepts=0;
@@ -98,7 +98,7 @@ public class DLOntology implements Serializable {
                 numberOfExternalConcepts++;
         m_numberOfExternalConcepts=numberOfExternalConcepts;
         if (atomicObjectRoles==null)
-            m_allAtomicObjectRoles=new TreeSet<>(AtomicRoleComparator.INSTANCE);
+            m_allAtomicObjectRoles=new TreeSet<>(Comparator.comparing(AtomicRole::getIRI));
         else
             m_allAtomicObjectRoles=atomicObjectRoles;
         if (allComplexObjectRoles==null)
@@ -106,7 +106,7 @@ public class DLOntology implements Serializable {
         else
             m_allComplexObjectRoles=allComplexObjectRoles;
         if (atomicDataRoles==null)
-            m_allAtomicDataRoles=new TreeSet<>(AtomicRoleComparator.INSTANCE);
+            m_allAtomicDataRoles=new TreeSet<>(Comparator.comparing(AtomicRole::getIRI));
         else
             m_allAtomicDataRoles=atomicDataRoles;
         if (allUnknownDatatypeRestrictions==null)
@@ -118,7 +118,7 @@ public class DLOntology implements Serializable {
         else
             m_definedDatatypeIRIs=definedDatatypeIRIs;
         if (individuals==null)
-            m_allIndividuals=new TreeSet<>(IndividualComparator.INSTANCE);
+            m_allIndividuals=new TreeSet<>(Comparator.comparing(Individual::getIRI));
         else
             m_allIndividuals=individuals;
         m_allDescriptionGraphs=new HashSet<>();
@@ -236,6 +236,10 @@ public class DLOntology implements Serializable {
     public Set<Role> getAllComplexObjectRoles() {
         return m_allComplexObjectRoles;
     }
+    /**
+     * @param role role
+     * @return true if complex
+     */
     public boolean isComplexObjectRole(Role role) {
         return m_allComplexObjectRoles.contains(role);
     }
@@ -405,40 +409,40 @@ public class DLOntology implements Serializable {
      * @return toString
      */
     public String toString(Prefixes prefixes) {
-        StringBuilder stringBuffer=new StringBuilder("Prefixes: [").append(CRLF);
+        StringBuilder builder=new StringBuilder("Prefixes: [").append(CRLF);
         for (Map.Entry<String,String> entry : prefixes.getPrefixIRIsByPrefixName().entrySet()) {
-            stringBuffer.append("  ").append(entry.getKey()).append(" = <").append(entry.getValue()).append('>').append(CRLF);
+            builder.append("  ").append(entry.getKey()).append(" = <").append(entry.getValue()).append('>').append(CRLF);
         }
-        stringBuffer.append("]").append(CRLF).append("Deterministic DL-clauses: [").append(CRLF);
+        builder.append("]").append(CRLF).append("Deterministic DL-clauses: [").append(CRLF);
         int numDeterministicClauses=0;
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()<=1) {
                 numDeterministicClauses++;
-                stringBuffer.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
+                builder.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
             }
-        stringBuffer.append("]").append(CRLF).append("Disjunctive DL-clauses: [").append(CRLF);
+        builder.append("]").append(CRLF).append("Disjunctive DL-clauses: [").append(CRLF);
         int numNondeterministicClauses=0;
         int numDisjunctions=0;
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()>1) {
                 numNondeterministicClauses++;
                 numDisjunctions+=dlClause.getHeadLength();
-                stringBuffer.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
+                builder.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
             }
-        stringBuffer.append("]").append(CRLF).append("ABox: [").append(CRLF);
+        builder.append("]").append(CRLF).append("ABox: [").append(CRLF);
         for (Atom atom : m_positiveFacts) {
-            stringBuffer.append("  ").append(atom.toString(prefixes)).append(CRLF);
+            builder.append("  ").append(atom.toString(prefixes)).append(CRLF);
         }
         for (Atom atom : m_negativeFacts) {
-            stringBuffer.append("  !").append(atom.toString(prefixes)).append(CRLF);
+            builder.append("  !").append(atom.toString(prefixes)).append(CRLF);
         }
-        stringBuffer.append("]").append(CRLF).append("Statistics: [").append(CRLF)
+        builder.append("]").append(CRLF).append("Statistics: [").append(CRLF)
         .append("  Number of deterministic clauses: " + numDeterministicClauses).append(CRLF)
         .append("  Number of nondeterministic clauses: " + numNondeterministicClauses).append(CRLF)
         .append("  Number of disjunctions: " + numDisjunctions).append(CRLF)
         .append("  Number of positive facts: " + m_positiveFacts.size()).append(CRLF)
         .append("  Number of negative facts: " + m_negativeFacts.size()).append(CRLF).append("]");
-        return stringBuffer.toString();
+        return builder.toString();
     }
     /**
      * @return statistics
@@ -446,8 +450,9 @@ public class DLOntology implements Serializable {
     public String getStatistics() {
         return getStatistics(null,null,null);
     }
-    protected String getStatistics(Integer numDeterministicClauses, Integer numNondeterministicClauses, Integer numDisjunctions) {
-        if (numDeterministicClauses==null || numNondeterministicClauses==null || numDisjunctions==null) {
+    protected String getStatistics(Integer deterministicClauses, Integer nondeterministicClauses, Integer disjunctions) {
+        int numDeterministicClauses;int numNondeterministicClauses; int numDisjunctions;
+        if (deterministicClauses==null || nondeterministicClauses==null || disjunctions==null) {
             numDeterministicClauses=0;
             numNondeterministicClauses=0;
             numDisjunctions=0;
@@ -459,8 +464,12 @@ public class DLOntology implements Serializable {
                     numDisjunctions+=dlClause.getHeadLength();
                 }
             }
+        }else {
+            numDeterministicClauses=deterministicClauses.intValue();
+            numNondeterministicClauses=nondeterministicClauses.intValue();
+            numDisjunctions=disjunctions.intValue();
         }
-        StringBuilder stringBuffer=new StringBuilder("DL clauses statistics: [").append(CRLF)
+        StringBuilder builder=new StringBuilder("DL clauses statistics: [").append(CRLF)
                 .append("  Number of deterministic clauses: " ).append( numDeterministicClauses).append(CRLF)
                 .append("  Number of nondeterministic clauses: " ).append( numNondeterministicClauses).append(CRLF)
                 .append("  Overall number of disjunctions: " ).append( numDisjunctions).append(CRLF)
@@ -474,7 +483,7 @@ public class DLOntology implements Serializable {
                 .append("  Number of object properties: ").append( m_allAtomicObjectRoles.size()).append(CRLF)
                 .append("  Number of data properties: ").append( m_allAtomicDataRoles.size()).append(CRLF)
                 .append("  Number of individuals: " ).append( m_allIndividuals.size()).append(CRLF).append("]");
-        return stringBuffer.toString();
+        return builder.toString();
     }
     @Override
     public String toString() {
@@ -501,48 +510,6 @@ public class DLOntology implements Serializable {
         }
         catch (ClassNotFoundException e) {
             throw new IOException(e);
-        }
-    }
-
-    public static class AtomicConceptComparator implements Serializable,Comparator<AtomicConcept> {
-        private static final long serialVersionUID=2386841732225838685L;
-        public static final Comparator<AtomicConcept> INSTANCE=new AtomicConceptComparator();
-
-        @Override
-        public int compare(AtomicConcept o1,AtomicConcept o2) {
-            return o1.getIRI().compareTo(o2.getIRI());
-        }
-
-        protected Object readResolve() {
-            return INSTANCE;
-        }
-    }
-
-    public static class AtomicRoleComparator implements Serializable,Comparator<AtomicRole> {
-        private static final long serialVersionUID=3483541702854959793L;
-        public static final Comparator<AtomicRole> INSTANCE=new AtomicRoleComparator();
-
-        @Override
-        public int compare(AtomicRole o1,AtomicRole o2) {
-            return o1.getIRI().compareTo(o2.getIRI());
-        }
-
-        protected Object readResolve() {
-            return INSTANCE;
-        }
-    }
-
-    public static class IndividualComparator implements Serializable,Comparator<Individual> {
-        private static final long serialVersionUID=2386841732225838685L;
-        public static final Comparator<Individual> INSTANCE=new IndividualComparator();
-
-        @Override
-        public int compare(Individual o1,Individual o2) {
-            return o1.getIRI().compareTo(o2.getIRI());
-        }
-
-        protected Object readResolve() {
-            return INSTANCE;
         }
     }
 }

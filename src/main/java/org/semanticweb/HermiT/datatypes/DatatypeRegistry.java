@@ -51,6 +51,9 @@ public class DatatypeRegistry {
         registerDatatypeHandler(new XMLLiteralDatatypeHandler());
     }
 
+    /**
+     * @param datatypeHandler handler to register
+     */
     public static void registerDatatypeHandler(DatatypeHandler datatypeHandler) {
         synchronized (s_handlersByDatatypeURI) {
             for (String datatypeURI : datatypeHandler.getManagedDatatypeURIs())
@@ -66,12 +69,12 @@ public class DatatypeRegistry {
             datatypeHandler=s_handlersByDatatypeURI.get(datatypeURI);
         }
         if (datatypeHandler==null) {
-            String CRLF=System.getProperty("line.separator");
+            String crlf=System.getProperty("line.separator");
             String message=
-                "HermiT supports all and only the datatypes of the OWL 2 datatype map, see "+CRLF+
-                "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps. "+CRLF+
-                "The datatype '"+datatypeURI+"' is not part of the OWL 2 datatype map and "+CRLF+
-                "no custom datatype definition is given; "+CRLF+
+                "HermiT supports all and only the datatypes of the OWL 2 datatype map, see "+crlf+
+                "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps. "+crlf+
+                "The datatype '"+datatypeURI+"' is not part of the OWL 2 datatype map and "+crlf+
+                "no custom datatype definition is given; "+crlf+
                 "therefore, HermiT cannot handle this datatype.";
             throw new UnsupportedDatatypeException(message);
         }
@@ -94,11 +97,11 @@ public class DatatypeRegistry {
             handler=getDatatypeHandlerFor(datatypeURI);
         }
         catch (UnsupportedDatatypeException e) {
-            String CRLF=System.getProperty("line.separator");
+            String crlf=System.getProperty("line.separator");
             String message=
-                "Literals can only use the datatypes from the OWL 2 datatype map, see "+CRLF+
-                "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps. "+CRLF+
-                "The datatype '"+datatypeURI+"' is not part of the OWL 2 datatype map and "+CRLF+
+                "Literals can only use the datatypes from the OWL 2 datatype map, see "+crlf+
+                "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps. "+crlf+
+                "The datatype '"+datatypeURI+"' is not part of the OWL 2 datatype map and "+crlf+
                 "HermiT cannot parse this literal.";
             throw new UnsupportedDatatypeException(message, e);
         }
@@ -161,8 +164,9 @@ public class DatatypeRegistry {
     }
 
     protected static class AnonymousConstantsDatatypeHandler implements DatatypeHandler {
+        private static final String ANONYMOUS_CONSTANTS_DATATYPE = "Internal error: anonymous constants datatype should not occur in datatype restrictions.";
         protected static final String ANONYMOUS_CONSTANTS="internal:anonymous-constants";
-        protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(ANONYMOUS_CONSTANTS);
+        protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(ANONYMOUS_CONSTANTS);
 
         @Override
         public Set<String> getManagedDatatypeURIs() {
@@ -175,36 +179,45 @@ public class DatatypeRegistry {
         }
         @Override
         public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
-            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+            throw new IllegalStateException(ANONYMOUS_CONSTANTS_DATATYPE);
         }
         @Override
         public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
-            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+            throw new IllegalStateException(ANONYMOUS_CONSTANTS_DATATYPE);
         }
         @Override
         public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
-            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+            throw new IllegalStateException(ANONYMOUS_CONSTANTS_DATATYPE);
         }
         @Override
         public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
-            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+            throw new IllegalStateException(ANONYMOUS_CONSTANTS_DATATYPE);
         }
         @Override
         public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
-            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+            throw new IllegalStateException(ANONYMOUS_CONSTANTS_DATATYPE);
         }
         @Override
         public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
-            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+            throw new IllegalStateException(ANONYMOUS_CONSTANTS_DATATYPE);
         }
     }
 
+    /**
+     * Anonymous constant.
+     */
     public static class AnonymousConstantValue {
         protected final String m_name;
 
+        /**
+         * @param name name
+         */
         public AnonymousConstantValue(String name) {
             m_name=name;
         }
+        /**
+         * @return name
+         */
         public String getName() {
             return m_name;
         }
@@ -220,9 +233,12 @@ public class DatatypeRegistry {
                 return false;
             return ((AnonymousConstantValue)that).m_name.equals(m_name);
         }
+        /**
+         * @param name name
+         * @return value
+         */
         public static AnonymousConstantValue create(String name) {
             return new AnonymousConstantValue(name);
         }
     }
-
 }

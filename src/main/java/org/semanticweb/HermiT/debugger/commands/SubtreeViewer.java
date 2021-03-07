@@ -40,8 +40,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -51,8 +49,6 @@ import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
@@ -64,6 +60,9 @@ import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
 
+/**
+ * Subtree viewer.
+ */
 @SuppressWarnings("serial")
 public class SubtreeViewer extends JFrame {
     protected final Debugger m_debugger;
@@ -72,6 +71,10 @@ public class SubtreeViewer extends JFrame {
     protected final JTree m_tableauTree;
     protected final JTextField m_nodeIDField;
 
+    /**
+     * @param debugger debugger
+     * @param rootNode root node
+     */
     public SubtreeViewer(Debugger debugger,Node rootNode) {
         super("Subtree for node "+rootNode.getNodeID());
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -81,15 +84,11 @@ public class SubtreeViewer extends JFrame {
         m_tableauTree.setLargeModel(true);
         m_tableauTree.setShowsRootHandles(true);
         m_tableauTree.setCellRenderer(new NodeCellRenderer(debugger));
-        m_tableauTree.addTreeSelectionListener(new TreeSelectionListener() {
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                TreePath selectionPath=m_tableauTree.getSelectionPath();
-                if (selectionPath==null)
+        m_tableauTree.addTreeSelectionListener(e->{
+                if (m_tableauTree.getSelectionPath()==null)
                     showNodeLabels(null);
                 else
-                    showNodeLabels((Node)selectionPath.getLastPathComponent());
-            }
+                    showNodeLabels((Node)m_tableauTree.getSelectionPath().getLastPathComponent());
         });
         m_nodeInfoTextArea=new JTextArea();
         m_nodeInfoTextArea.setFont(Debugger.s_monospacedFont);
@@ -104,35 +103,27 @@ public class SubtreeViewer extends JFrame {
         m_nodeIDField.setPreferredSize(new Dimension(200,m_nodeIDField.getPreferredSize().height));
         commandsPanel.add(m_nodeIDField);
         JButton button=new JButton("Search");
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int nodeID;
-                String nodeIDText=m_nodeIDField.getText();
-                try {
-                    nodeID=Integer.parseInt(nodeIDText);
-                }
-                catch (NumberFormatException error) {
-                    JOptionPane.showMessageDialog(SubtreeViewer.this,"Invalid node ID '"+nodeIDText+"'. "+error.getMessage());
-                    return;
-                }
-                Node node=m_debugger.getTableau().getNode(nodeID);
-                if (node==null) {
-                    JOptionPane.showMessageDialog(SubtreeViewer.this,"Node with ID "+nodeID+" cannot be found.");
-                    return;
-                }
-                findNode(node);
+        button.addActionListener(e -> {
+            int nodeID;
+            String nodeIDText=m_nodeIDField.getText();
+            try {
+                nodeID=Integer.parseInt(nodeIDText);
             }
+            catch (NumberFormatException error) {
+                JOptionPane.showMessageDialog(SubtreeViewer.this,"Invalid node ID '"+nodeIDText+"'. "+error.getMessage());
+                return;
+            }
+            Node node=m_debugger.getTableau().getNode(nodeID);
+            if (node==null) {
+                JOptionPane.showMessageDialog(SubtreeViewer.this,"Node with ID "+nodeID+" cannot be found.");
+                return;
+            }
+            findNode(node);
         });
         getRootPane().setDefaultButton(button);
         commandsPanel.add(button);
         button=new JButton("Refresh");
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                refresh();
-            }
-        });
+        button.addActionListener(e->refresh());
         commandsPanel.add(button);
         JPanel mainPanel=new JPanel(new BorderLayout());
         mainPanel.add(mainSplit,BorderLayout.CENTER);
@@ -143,10 +134,20 @@ public class SubtreeViewer extends JFrame {
         setVisible(true);
         m_nodeIDField.requestFocusInWindow();
     }
+    /**
+     * Refresh.
+     */
     public void refresh() {
         m_subtreeTreeModel.refresh();
     }
+    /**
+     * @param node node
+     */
     public void findNode(Node node) {
+        if (node==null) {
+            JOptionPane.showMessageDialog(SubtreeViewer.this,"Null node is not present in the shown subtree.");
+            return;
+        }
         List<Node> pathToRoot=new ArrayList<>();
         Node currentNode=node;
         while (currentNode!=null && currentNode!=m_subtreeTreeModel.getRoot()) {
@@ -164,6 +165,9 @@ public class SubtreeViewer extends JFrame {
         m_tableauTree.setSelectionPath(treePath);
         m_tableauTree.scrollPathToVisible(treePath);
     }
+    /**
+     * @param node node
+     */
     public void showNodeLabels(Node node) {
         if (node==null)
             m_nodeInfoTextArea.setText("");
@@ -264,7 +268,7 @@ public class SubtreeViewer extends JFrame {
         @Override
         public Component getTreeCellRendererComponent(JTree tree,Object value,boolean s,boolean expanded,boolean leaf,int row,boolean focus) {
             Node node=(Node)value;
-            StringBuffer buffer=new StringBuffer();
+            StringBuilder buffer=new StringBuilder();
             ExistentialConcept existentialConcept=m_debugger.getNodeCreationInfo(node).m_createdByExistential;
             if (existentialConcept==null) {
                 buffer.append(node.getNodeID());

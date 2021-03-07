@@ -55,14 +55,12 @@ public abstract class AbstractCommand implements DebuggerCommand {
         frame.setLocation(100,100);
         frame.setVisible(true);
     }
+    protected void toFront() {
+        if (m_debugger!=null)
+            m_debugger.getMainFrame().toFront();
+    }
     protected void selectConsoleWindow() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                if (m_debugger!=null)
-                    m_debugger.getMainFrame().toFront();
-            }
-        });
+        SwingUtilities.invokeLater(this::toFront);
     }
     protected DLPredicate getDLPredicate(String predicate) {
         if ("==".equals(predicate))
@@ -92,8 +90,8 @@ public abstract class AbstractCommand implements DebuggerCommand {
         if (!node.isBlocked())
             return "no";
         else if (node.isDirectlyBlocked())
-            return "directly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
+            return "directly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : Integer.toString(node.getBlocker().getNodeID()));
         else
-            return "indirectly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
+            return "indirectly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : Integer.toString(node.getBlocker().getNodeID()));
     }
 }

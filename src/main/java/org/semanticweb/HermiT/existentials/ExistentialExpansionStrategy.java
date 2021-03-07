@@ -64,12 +64,21 @@ public interface ExistentialExpansionStrategy {
      * @param isCore isCore
      */
     void assertionAdded(Concept concept,Node node,boolean isCore);
+    /**
+     * @param dataRange data range
+     * @param node node
+     * @param isCore is core
+     */
     void assertionAdded(DataRange dataRange,Node node,boolean isCore);
     /**
      * @param concept concept
      * @param node node
      */
     void assertionCoreSet(Concept concept,Node node);
+    /**
+     * @param dataRange data range
+     * @param node node
+     */
     void assertionCoreSet(DataRange dataRange,Node node);
     /**
      * @param concept concept
@@ -77,6 +86,11 @@ public interface ExistentialExpansionStrategy {
      * @param isCore isCore
      */
     void assertionRemoved(Concept concept,Node node,boolean isCore);
+    /**
+     * @param dataRange data range
+     * @param node node
+     * @param isCore is core
+     */
     void assertionRemoved(DataRange dataRange,Node node,boolean isCore);
     /**
      * @param atomicRole atomicRole

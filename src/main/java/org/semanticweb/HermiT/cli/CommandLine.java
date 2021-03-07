@@ -70,7 +70,7 @@ public class CommandLine {
                 base=new URI("file",System.getProperty("user.dir")+"/",null);
             }
             catch (java.net.URISyntaxException e) {
-                throw new RuntimeException("unable to create default IRI base");
+                throw new IllegalArgumentException("unable to create default IRI base",e);
             }
             Collection<IRI> ontologies=new LinkedList<>();
             boolean didSomething=false;
@@ -110,7 +110,7 @@ public class CommandLine {
                                 verbosity+=Integer.parseInt(arg,10);
                             }
                             catch (NumberFormatException e) {
-                                throw new UsageException("argument to --verbose must be a number");
+                                throw new UsageException("argument to --verbose must be a number",e);
                             }
                     }
                         break;
@@ -124,14 +124,14 @@ public class CommandLine {
                                 verbosity-=Integer.parseInt(arg,10);
                             }
                             catch (NumberFormatException e) {
-                                throw new UsageException("argument to --quiet must be a number");
+                                throw new UsageException("argument to --quiet must be a number",e);
                             }
                     }
                         break;
                     case 'o': {
                         String arg=g.getOptarg();
                         if (arg==null)
-                            throw new UsageException("--output requires an argument");
+                            throw new UsageException("--output requires an argument",null);
                         if (arg.equals("-"))
                             output=new PrintWriter(System.out);
                         else {
@@ -144,13 +144,13 @@ public class CommandLine {
                                 resultsFileLocation=file.getAbsolutePath();
                             }
                             catch (FileNotFoundException e) {
-                                throw new IllegalArgumentException("unable to open "+arg+" for writing");
+                                throw new IllegalArgumentException("unable to open "+arg+" for writing",e);
                             }
                             catch (SecurityException e) {
-                                throw new IllegalArgumentException("unable to write to "+arg);
+                                throw new IllegalArgumentException("unable to write to "+arg,e);
                             }
                             catch (IOException e) {
-                                throw new IllegalArgumentException("unable to write to "+arg+": "+e.getMessage());
+                                throw new IllegalArgumentException("unable to write to "+arg+": "+e.getMessage(),e);
                             }
                         }
                     }
@@ -158,7 +158,7 @@ public class CommandLine {
                     case kPremise: {
                         String arg=g.getOptarg();
                         if (arg==null)
-                            throw new UsageException("--premise requires a IRI as argument");
+                            throw new UsageException("--premise requires a IRI as argument",null);
                         else {
                             ontologies.add(IRI.create(arg));
                         }
@@ -167,7 +167,7 @@ public class CommandLine {
                     case kConclusion: {
                         String arg=g.getOptarg();
                         if (arg==null)
-                            throw new UsageException("--conclusion requires a IRI as argument");
+                            throw new UsageException("--conclusion requires a IRI as argument",null);
                         else {
                             conclusionIRI=IRI.create(arg);
                         }
@@ -229,7 +229,7 @@ public class CommandLine {
                         break;
                     case 'E': {
                         if (conclusionIRI!=null)
-                            actions.add(new EntailsAction(config, conclusionIRI));
+                            actions.add(new EntailsAction(conclusionIRI));
                     }
                         break;
                     case kDumpPrefixes: {
@@ -260,42 +260,42 @@ public class CommandLine {
                             base=new URI(arg);
                         }
                         catch (java.net.URISyntaxException e) {
-                            throw new IllegalArgumentException("'"+arg+"' is not a valid base URI.");
+                            throw new IllegalArgumentException("'"+arg+"' is not a valid base URI.",e);
                         }
                     }
                         break;
 
                     case kDirectBlock: {
                         String arg=g.getOptarg();
-                        if (arg.toLowerCase().equals("pairwise")) {
+                        if (arg.equalsIgnoreCase("pairwise")) {
                             config.directBlockingType=Configuration.DirectBlockingType.PAIR_WISE;
                         }
-                        else if (arg.toLowerCase().equals("single")) {
+                        else if (arg.equalsIgnoreCase("single")) {
                             config.directBlockingType=Configuration.DirectBlockingType.SINGLE;
                         }
-                        else if (arg.toLowerCase().equals("optimal")) {
+                        else if (arg.equalsIgnoreCase("optimal")) {
                             config.directBlockingType=Configuration.DirectBlockingType.OPTIMAL;
                         }
                         else
-                            throw new UsageException("unknown direct blocking type '"+arg+"'; supported values are 'pairwise', 'single', and 'optimal'");
+                            throw new UsageException("unknown direct blocking type '"+arg+"'; supported values are 'pairwise', 'single', and 'optimal'", null);
                     }
                         break;
                     case kBlockStrategy: {
                         String arg=g.getOptarg();
-                        if (arg.toLowerCase().equals("anywhere")) {
+                        if (arg.equalsIgnoreCase("anywhere")) {
                             config.blockingStrategyType=Configuration.BlockingStrategyType.ANYWHERE;
                         }
-                        else if (arg.toLowerCase().equals("ancestor")) {
+                        else if (arg.equalsIgnoreCase("ancestor")) {
                             config.blockingStrategyType=Configuration.BlockingStrategyType.ANCESTOR;
                         }
-                        else if (arg.toLowerCase().equals("core")) {
+                        else if (arg.equalsIgnoreCase("core")) {
                             config.blockingStrategyType=Configuration.BlockingStrategyType.SIMPLE_CORE;
                         }
-                        else if (arg.toLowerCase().equals("optimal")) {
+                        else if (arg.equalsIgnoreCase("optimal")) {
                             config.blockingStrategyType=Configuration.BlockingStrategyType.OPTIMAL;
                         }
                         else
-                            throw new UsageException("unknown blocking strategy type '"+arg+"'; supported values are 'ancestor' and 'anywhere'");
+                            throw new UsageException("unknown blocking strategy type '"+arg+"'; supported values are 'ancestor' and 'anywhere'", null);
                     }
                         break;
                     case kBlockCache: {
@@ -304,17 +304,17 @@ public class CommandLine {
                         break;
                     case kExpansion: {
                         String arg=g.getOptarg();
-                        if (arg.toLowerCase().equals("creation")) {
+                        if (arg.equalsIgnoreCase("creation")) {
                             config.existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
                         }
-                        else if (arg.toLowerCase().equals("el")) {
+                        else if (arg.equalsIgnoreCase("el")) {
                             config.existentialStrategyType=Configuration.ExistentialStrategyType.EL;
                         }
-                        else if (arg.toLowerCase().equals("reuse")) {
+                        else if (arg.equalsIgnoreCase("reuse")) {
                             config.existentialStrategyType=Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE;
                         }
                         else
-                            throw new UsageException("unknown existential strategy type '"+arg+"'; supported values are 'creation', 'el', and 'reuse'");
+                            throw new UsageException("unknown existential strategy type '"+arg+"'; supported values are 'creation', 'el', and 'reuse'", null);
                     }
                         break;
                     case kIgnoreUnsupportedDatatypes: {
@@ -331,9 +331,9 @@ public class CommandLine {
                         break;
                     default: {
                         if (g.getOptopt()!=0) {
-                            throw new UsageException("invalid option -- "+(char)g.getOptopt());
+                            throw new UsageException("invalid option -- "+(char)g.getOptopt(), null);
                         }
-                        throw new UsageException("invalid option");
+                        throw new UsageException("invalid option", null);
                     }
                     } // end option switch
                 } // end loop over options
@@ -342,7 +342,7 @@ public class CommandLine {
                         ontologies.add(IRI.create(base.resolve(argv[i])));
                     }
                     catch (IllegalArgumentException e) {
-                        throw new UsageException(argv[i]+" is not a valid ontology name");
+                        throw new UsageException(argv[i]+" is not a valid ontology name",e);
                     }
                 }
             } // done processing arguments
@@ -385,7 +385,7 @@ public class CommandLine {
                             prefixes.declareDefaultPrefix(defaultPrefix);
                         }
                         catch (IllegalArgumentException e) {
-                            status.log(2,"Default prefix "+defaultPrefix+" could not be registered because there is already a registered default prefix. ");
+                            status.log(2,"Default prefix "+defaultPrefix+" could not be registered because there is already a registered default prefix. "+e.getMessage());
                         }
                     }
                     for (String prefixName : prefixMappings.keySet()) {
@@ -393,7 +393,7 @@ public class CommandLine {
                             prefixes.declarePrefix(prefixName, prefixMappings.get(prefixName));
                         }
                         catch (IllegalArgumentException e) {
-                            status.log(2,"Prefixname "+prefixName+" could not be set to "+prefixMappings.get(prefixName)+" because there is already a registered prefix name for the IRI. ");
+                            status.log(2,"Prefixname "+prefixName+" could not be set to "+prefixMappings.get(prefixName)+" because there is already a registered prefix name for the IRI. "+e.getMessage());
                         }
                     }
                     long loadTime=System.currentTimeMillis()-startTime;
@@ -412,7 +412,7 @@ public class CommandLine {
                 }
             }
             if (!didSomething)
-                throw new UsageException("No ontologies given.");
+                throw new UsageException("No ontologies given.", null);
         }
         catch (UsageException e) {
             System.err.println(e.getMessage());

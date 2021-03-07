@@ -20,6 +20,7 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.semanticweb.HermiT.blocking.ValidatedSingleDirectBlockingChecker.ValidatedBlockingObject;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -171,9 +172,9 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                     if ((node.isDirectlyBlocked() && (m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker()))) || !node.getParent().isBlocked()) {
                         Node validBlocker=null;
                         Node currentBlocker=node.getBlocker();
-                        if (node.isDirectlyBlocked() && currentBlocker!=null) {
+                        if (node.isDirectlyBlocked() && currentBlocker!=null &&
                             // try the old blocker fist
-                            if (isBlockValid(node))
+                            isBlockValid(node)) {
                                 validBlocker=currentBlocker;
                         }
                         if (validBlocker==null) {
@@ -565,8 +566,8 @@ class ValidatedBlockersCache {
         }
         return new ArrayList<>();
     }
-    protected static int getIndexFor(int _hashCode,int tableLength) {
-        int hashCode=_hashCode;
+    protected static int getIndexFor(int c,int tableLength) {
+        int hashCode=c;
         hashCode+=~(hashCode<<9);
         hashCode^=(hashCode>>>14);
         hashCode+=(hashCode<<4);
@@ -575,14 +576,14 @@ class ValidatedBlockersCache {
     }
     @Override
     public String toString() {
-        String buckets="";
+        StringBuilder buckets= new StringBuilder();
         for (int i=0;i<m_buckets.length;i++) {
             CacheEntry entry=m_buckets[i];
             if (entry!=null) {
-                buckets+="Bucket "+i+": ["+entry.toString()+"] ";
+                buckets.append("Bucket ").append(i).append(": [").append(entry.toString()).append("] ");
             }
         }
-        return buckets;
+        return buckets.toString();
     }
 
     public static class CacheEntry implements Serializable {
@@ -606,11 +607,7 @@ class ValidatedBlockersCache {
         }
         @Override
         public String toString() {
-            String nodes="HashCode: "+m_hashCode+" Nodes: ";
-            for (Node n : m_nodes) {
-                nodes+=n.getNodeID()+" ";
-            }
-            return nodes;
+            return m_nodes.stream().map(Object::toString).collect(Collectors.joining(" ", "HashCode: "+m_hashCode+" Nodes: ", ""));
         }
     }
 }

@@ -136,20 +136,19 @@ public class ConsoleTextArea extends JTextArea {
                 if (m_firstFreeChar>0) {
                     final String string=new String(m_buffer,0,m_firstFreeChar);
                     m_firstFreeChar=0;
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            replaceSelection(string);
-                            m_userTypedTextStart=getDocument().getLength();
-                            select(m_userTypedTextStart,m_userTypedTextStart);
-                        }
+                    SwingUtilities.invokeLater(() -> {
+                        replaceSelection(string);
+                        m_userTypedTextStart=getDocument().getLength();
+                        select(m_userTypedTextStart,m_userTypedTextStart);
                      });
                     m_timer.stop();
                 }
             }
         }
         @Override
-        public void write(char[] buffer,int offset,int count) {
+        public void write(char[] buffer,int o,int c) {
+            int count=c;
+            int offset=o;
             synchronized (lock) {
                 int lastPosition=offset+count;
                 while (offset!=lastPosition) {
@@ -219,6 +218,7 @@ public class ConsoleTextArea extends JTextArea {
                         lock.wait();
                     }
                     catch (InterruptedException error) {
+                        Thread.currentThread().interrupt();
                         throw new IOException("Read interrupted.",error);
                     }
                 int toCopy=Math.min(m_firstFreeChar-m_nextCharToRead,length);

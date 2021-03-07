@@ -60,9 +60,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected void createReasoner(Configuration configuration, Set<DescriptionGraph> descriptionGraphs) {
-        if (descriptionGraphs == null)
-            descriptionGraphs = Collections.emptySet();
-        m_reasoner = new Reasoner(configuration, m_ontology, descriptionGraphs);
+        m_reasoner = new Reasoner(configuration, m_ontology, descriptionGraphs==null?Collections.emptySet():descriptionGraphs);
     }
 
     protected void createOWLReasoner(Configuration c) {
@@ -126,12 +124,14 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      * @param expectedResult
      */
     protected void assertSubsumedBy(String subAtomicConcept, String superAtomicConcept, boolean expectedResult) {
+        String sub=subAtomicConcept;
         if (!subAtomicConcept.contains("#"))
-            subAtomicConcept = NS + subAtomicConcept;
+            sub = NS + subAtomicConcept;
+        String sup=superAtomicConcept;
         if (!superAtomicConcept.contains("#"))
-            superAtomicConcept = NS + superAtomicConcept;
-        OWLClass subClass = m_dataFactory.getOWLClass(IRI.create(subAtomicConcept));
-        OWLClass superClass = m_dataFactory.getOWLClass(IRI.create(superAtomicConcept));
+            sup = NS + superAtomicConcept;
+        OWLClass subClass = m_dataFactory.getOWLClass(IRI.create(sub));
+        OWLClass superClass = m_dataFactory.getOWLClass(IRI.create(sup));
         boolean result = m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(subClass, superClass));
         assertEquals(expectedResult, result);
     }
@@ -152,9 +152,10 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      * that this coincides with the expected result (satisfiable).
      */
     protected void assertSatisfiable(String atomicConcept, boolean expectedResult) {
+        String iri=atomicConcept;
         if (!atomicConcept.contains("#"))
-            atomicConcept = NS + atomicConcept;
-        OWLClass clazz = m_dataFactory.getOWLClass(IRI.create(atomicConcept));
+            iri = NS + atomicConcept;
+        OWLClass clazz = m_dataFactory.getOWLClass(IRI.create(iri));
         boolean result = m_reasoner.isSatisfiable(clazz);
         assertEquals(expectedResult, result);
     }
@@ -295,9 +296,10 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      * Checks the equivalents of some object property.
      */
     protected void assertEquivalentObjectProperties(String objectProperty, String... control) {
+        String iri=objectProperty;
         if (!objectProperty.contains("#"))
-            objectProperty = NS + objectProperty;
-        OWLObjectPropertyExpression ope = m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+            iri = NS + objectProperty;
+        OWLObjectPropertyExpression ope = m_dataFactory.getOWLObjectProperty(IRI.create(iri));
         Set<String> actual = nodeOfOPEs(m_reasoner.getEquivalentObjectProperties(ope));
         assertContainsAll(actual, control);
     }
@@ -354,19 +356,20 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      * Checks the equivalents of some data property.
      */
     protected void assertEquivalentDataProperties(String dataProperty, String... control) {
+        String iri=dataProperty;
         if (!dataProperty.contains("#"))
-            dataProperty = NS + dataProperty;
-        OWLDataProperty dp = m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
+            iri = NS + dataProperty;
+        OWLDataProperty dp = m_dataFactory.getOWLDataProperty(IRI.create(iri));
         Set<String> actual = nodeOfDPEs(m_reasoner.getEquivalentDataProperties(dp));
         assertContainsAll(actual, control);
     }
 
     protected void assertEntails(OWLAxiom axiom, boolean expectedResult) {
-        assertTrue(new EntailmentChecker(m_reasoner, m_dataFactory).entails(axiom) == expectedResult);
+        assertEquals(expectedResult,new EntailmentChecker(m_reasoner, m_dataFactory).entails(axiom));
     }
 
     protected void assertEntails(Set<OWLLogicalAxiom> axioms, boolean expectedResult) {
-        assertTrue(new EntailmentChecker(m_reasoner, m_dataFactory).entails(axioms) == expectedResult);
+        assertEquals(expectedResult,new EntailmentChecker(m_reasoner, m_dataFactory).entails(axioms));
     }
 
     protected static Set<Set<String>> nodeSetOfOPEsToStrings(NodeSet<OWLObjectPropertyExpression> nodeSet) {
@@ -526,7 +529,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
 
     protected static String IRI(String arg) {
         if (!arg.contains("#"))
-            arg = NS + arg;
+            return NS + arg;
         return arg;
     }
 

@@ -85,14 +85,14 @@ public class FloatInterval {
         // We know that the interval is not empty; hence, neither bound is NaN.
         float number=m_lowerBoundInclusive;
         while (!areIdentical(number,m_upperBoundInclusive)) {
-            numbers.add(number);
+            numbers.add(Float.valueOf(number));
             number=nextFloat(number);
         }
-        numbers.add(m_upperBoundInclusive);
+        numbers.add(Float.valueOf(m_upperBoundInclusive));
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("FLOAT[");
         buffer.append(m_lowerBoundInclusive);
         buffer.append("..");
@@ -100,6 +100,10 @@ public class FloatInterval {
         buffer.append(']');
         return buffer.toString();
     }
+    /**
+     * @param bits bits to test
+     * @return true if NaN
+     */
     public static boolean isNaN(int bits) {
         return ((bits & 0x7f800000)==0x7f800000) && ((bits & 0x003fffff)!=0);
     }
@@ -132,7 +136,7 @@ public class FloatInterval {
                 newPositive=true;
                 newMagnitude=magnitude+1;
             }
-            else if (!positive && magnitude==0) {
+            else if (magnitude==0) {
                 // The successor of -0 is +0
                 newPositive=true;
                 newMagnitude=0;
@@ -145,6 +149,10 @@ public class FloatInterval {
             return Float.intBitsToFloat(newBits);
         }
     }
+    /**
+     * @param value float
+     * @return previous float
+     */
     public static float previousFloat(float value) {
         int bits=Float.floatToIntBits(value);
         int magnitude=(bits & 0x7fffffff);
@@ -159,7 +167,7 @@ public class FloatInterval {
                 newPositive=false;
                 newMagnitude=magnitude+1;
             }
-            else if (positive && magnitude==0) {
+            else if (magnitude==0) {
                 // The predecessor of +0 is -0
                 newPositive=false;
                 newMagnitude=0;
@@ -175,10 +183,11 @@ public class FloatInterval {
     /**
      * @param lowerBoundInclusive lowerBoundInclusive
      * @param upperBoundInclusive upperBoundInclusive
-     * @param argument argument
+     * @param arg argument
      * @return subtracted size
      */
-    public static int subtractIntervalSizeFrom(float lowerBoundInclusive,float upperBoundInclusive,int argument) {
+    public static int subtractIntervalSizeFrom(float lowerBoundInclusive,float upperBoundInclusive,int arg) {
+        int argument=arg;
         if (argument<=0)
             return 0;
         int bitsLowerBoundInclusive=Float.floatToIntBits(lowerBoundInclusive);
@@ -203,7 +212,7 @@ public class FloatInterval {
             int size=magnitudeLowerBoundInclusive-magnitudeUpperBoundInclusive+1;
             return Math.max(argument-size,0);
         }
-        else if (!positiveLowerBoundInclusive && positiveUpperBoundInclusive) {
+        else if (!positiveLowerBoundInclusive) {
             // the number of values from 'lowerBoundInclusive' to -0
             int startToMinusZero=magnitudeLowerBoundInclusive+1;
             if (startToMinusZero>=argument)
@@ -218,6 +227,12 @@ public class FloatInterval {
         else // if (positiveLowerBoundInclusive && !positiveUpperBoundInclusiev) is impossible at this point
             throw new IllegalStateException();
     }
+    /**
+     * @param startInclusive start
+     * @param endInclusive end
+     * @param value value
+     * @return true if contained
+     */
     public static boolean contains(float startInclusive,float endInclusive,float value) {
         int bitsStart=Float.floatToIntBits(startInclusive);
         int bitsEnd=Float.floatToIntBits(endInclusive);
@@ -261,9 +276,9 @@ public class FloatInterval {
             return magnitude1<=magnitude2;
         else if (!positive1 && positive2)
             return true;
-        else if (positive1 && !positive2)
+        else if (positive1)
             return false;
-        else // if (!positive1 && !positive2)
+        else
             return magnitude1>=magnitude2;
     }
 }

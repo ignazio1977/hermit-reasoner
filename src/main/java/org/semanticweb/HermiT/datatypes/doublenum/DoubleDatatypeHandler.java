@@ -18,6 +18,7 @@
 package org.semanticweb.HermiT.datatypes.doublenum;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -36,13 +37,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset DOUBLE_ENTIRE=new EntireDoubleSubset();
     protected static final ValueSpaceSubset EMPTY_SUBSET=new EmptyDoubleSubset();
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_DOUBLE);
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<>();
-    static {
-        s_supportedFacetURIs.add(XSD_NS+"minInclusive");
-        s_supportedFacetURIs.add(XSD_NS+"minExclusive");
-        s_supportedFacetURIs.add(XSD_NS+"maxInclusive");
-        s_supportedFacetURIs.add(XSD_NS+"maxExclusive");
-    }
+    protected static final Set<String> s_supportedFacetURIs=new HashSet<>(Arrays.asList(XSD_NS+"minInclusive",XSD_NS+"minExclusive",XSD_NS+"maxInclusive",XSD_NS+"maxExclusive"));
 
     @Override
     public Set<String> getManagedDatatypeURIs() {
@@ -52,11 +47,11 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert XSD_DOUBLE.equals(datatypeURI);
         try {
-            return Double.parseDouble(lexicalForm);
+            return Double.valueOf(lexicalForm);
         }
         catch (NumberFormatException error) {
-            if (lexicalForm.equals("INF")) return Double.POSITIVE_INFINITY;
-            if (lexicalForm.equals("-INF")) return Double.NEGATIVE_INFINITY;
+            if (lexicalForm.equals("INF")) return Double.valueOf( Double.POSITIVE_INFINITY);
+            if (lexicalForm.equals("-INF")) return Double.valueOf( Double.NEGATIVE_INFINITY);
             throw new MalformedLiteralException(lexicalForm,datatypeURI, error);
         }
     }
@@ -169,7 +164,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
         double upperBoundInclusive=Double.POSITIVE_INFINITY;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            double facetDataValue=(Double)datatypeRestriction.getFacetValue(index).getDataValue();
+            double facetDataValue=((Double)datatypeRestriction.getFacetValue(index).getDataValue()).doubleValue();
             if ((XSD_NS+"minInclusive").equals(facetURI)) {
                 if (DoubleInterval.areIdentical(facetDataValue,+0.0))
                     facetDataValue=-0.0;

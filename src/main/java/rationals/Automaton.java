@@ -29,9 +29,9 @@ import rationals.transformations.TransformationsToolBox;
  * the symbol <em>@</em>.
  * <p>
  * In this implementation of automaton, any object may be a label, states are
- * instance of class <tt>State</tt> and transitions are intances of class
- * <tt>Transition</tt>. Only automata should create instances of states through
- * <tt>Automaton</tt> method <tt>newState</tt>.
+ * instance of class {@code State} and transitions are intances of class
+ * {@code Transition}. Only automata should create instances of states through
+ * {@code Automaton} method {@code newState}.
  * 
  * @author yroos@lifl.fr
  * @author bailly@lifl.fr
@@ -276,7 +276,7 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
      *         automaton <em>A' = (X , Q , T , I , D')</em> where <em>D'</em> is
      *         the set <em>{ (q , l , q') | (q' , l , q) in D}</em>. Objects
      *         which are contained in this set are instances of class
-     *         <tt>Transition</tt>.
+     *         {@code Transition}.
      * @see Transition
      */
     @Override
@@ -314,7 +314,7 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
      * returns a textual representation of this automaton.
      * 
      * @return a textual representation of this automaton based on the converter
-     *         <tt>toAscii</tt>.
+     *         {@code toAscii}.
      * @see rationals.converters.toAscii
      */
     @Override
@@ -355,7 +355,7 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
             if (o == this) {
                 return true;
             }
-            if (o == null || !(o instanceof Key))
+            if (!(o instanceof Key))
                 return false;
             Key t = (Key) o;
             return (l == null ? t.l == null : l.equals(t.l)) && (s == null ? t.s == null : s.equals(t.s));
@@ -383,10 +383,9 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
     }
 
     @Override
-    public Set<State> steps(Set<State> s, List<?> word) {
-        Iterator<?> it = word.iterator();
-        while (it.hasNext()) {
-            Object o = it.next();
+    public Set<State> steps(Set<State> set, List<?> word) {
+        Set<State> s = set;
+        for(Object o: word) {
             s = step(s, o);
             if (s.isEmpty())
                 return s;

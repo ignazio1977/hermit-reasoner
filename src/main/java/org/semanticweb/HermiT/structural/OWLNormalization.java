@@ -164,7 +164,7 @@ public class OWLNormalization {
         m_axioms.m_objectProperties.addAll(ontology.getObjectPropertiesInSignature(Imports.INCLUDED));
         m_axioms.m_dataProperties.addAll(ontology.getDataPropertiesInSignature(Imports.INCLUDED));
         m_axioms.m_namedIndividuals.addAll(ontology.getIndividualsInSignature(Imports.INCLUDED));
-        processAxioms(ontology.getLogicalAxioms());
+        processAxioms(ontology.getLogicalAxioms(Imports.INCLUDED));
     }
     /**
      * @param axioms axioms
@@ -367,7 +367,7 @@ public class OWLNormalization {
         OWLClassExpression definition=m_definitions.get(description);
         if (definition==null || (forcePositive && !(definition instanceof OWLClass))) {
             definition=m_factory.getOWLClass(IRI.create("internal:def#"+(m_definitions.size()+m_firstReplacementIndex)));
-            if (!forcePositive && !description.accept(m_plVisitor))
+            if (!forcePositive && !description.accept(m_plVisitor).booleanValue())
                 definition=m_factory.getOWLObjectComplementOf(definition);
             m_definitions.put(description,definition);
             alreadyExists[0]=false;
@@ -1430,14 +1430,14 @@ public class OWLNormalization {
         @Override
         public Boolean visit(OWLObjectIntersectionOf object) {
             for (OWLClassExpression desc : object.getOperands())
-                if (desc.accept(this))
+                if (desc.accept(this).booleanValue())
                     return Boolean.TRUE;
             return Boolean.FALSE;
         }
         @Override
         public Boolean visit(OWLObjectUnionOf object) {
             for (OWLClassExpression desc : object.getOperands())
-                if (desc.accept(this))
+                if (desc.accept(this).booleanValue())
                     return Boolean.TRUE;
             return Boolean.FALSE;
         }
@@ -1467,7 +1467,7 @@ public class OWLNormalization {
         }
         @Override
         public Boolean visit(OWLObjectMinCardinality object) {
-            return object.getCardinality()>0;
+            return Boolean.valueOf(object.getCardinality()>0);
         }
         @Override
         public Boolean visit(OWLObjectMaxCardinality object) {

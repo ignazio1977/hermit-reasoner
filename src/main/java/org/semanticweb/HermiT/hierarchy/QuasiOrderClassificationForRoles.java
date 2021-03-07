@@ -17,6 +17,7 @@
  */
 package org.semanticweb.HermiT.hierarchy;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,12 +51,12 @@ public class QuasiOrderClassificationForRoles extends QuasiOrderClassification {
         m_rolesForConcepts=rolesForConcepts;
     }
     @Override
-    protected void initialiseKnownSubsumptionsUsingToldSubsumers(Set<DLClause> dlClauses) {
+    protected void initialiseKnownSubsumptionsUsingToldSubsumers(Collection<DLClause> dlClauses) {
         for (DLClause dlClause : dlClauses) {
             if (dlClause.getHeadLength()==1 && dlClause.getBodyLength()==1) {
                 DLPredicate headPredicate=dlClause.getHeadAtom(0).getDLPredicate();
                 DLPredicate bodyPredicate=dlClause.getBodyAtom(0).getDLPredicate();
-                if (headPredicate instanceof AtomicRole && m_conceptsForRoles.containsKey(headPredicate) && bodyPredicate instanceof AtomicRole && m_conceptsForRoles.containsKey(bodyPredicate)) {
+                if (headPredicate instanceof AtomicRole && m_conceptsForRoles.containsKey((AtomicRole)headPredicate) && bodyPredicate instanceof AtomicRole && m_conceptsForRoles.containsKey((AtomicRole)bodyPredicate)) {
                     AtomicRole headRole=(AtomicRole)headPredicate;
                     AtomicRole bodyRole=(AtomicRole)bodyPredicate;
                     AtomicConcept conceptForHeadRole=m_conceptsForRoles.get(headRole);
@@ -108,6 +109,6 @@ public class QuasiOrderClassificationForRoles extends QuasiOrderClassification {
             assert superconcepts[i] instanceof AtomicConcept;
             roles[i]=m_rolesForConcepts.get(superconcepts[i]);
         }
-        return ReasoningTaskDescription.isRoleSubsumedByList(m_rolesForConcepts.get(subConcept),roles,true);
+        return ReasoningTaskDescription.isRoleSubsumedByList(m_rolesForConcepts.get(subConcept),roles,Boolean.TRUE);
     }
 }

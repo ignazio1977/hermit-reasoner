@@ -21,6 +21,9 @@ import java.util.Collection;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
+/**
+ * Double subset.
+ */
 public class EntireDoubleSubset implements ValueSpaceSubset {
 
     @Override
@@ -31,19 +34,17 @@ public class EntireDoubleSubset implements ValueSpaceSubset {
     }
     @Override
     public boolean containsDataValue(Object dataValue) {
-        if (dataValue instanceof Double) 
-            return true;
-        return false;
+        return dataValue instanceof Double;
     }
     @Override
     public void enumerateDataValues(Collection<Object> dataValues) {
-        dataValues.add(Double.NaN);
+        dataValues.add(Double.valueOf(Double.NaN));
         double number=Double.NEGATIVE_INFINITY;
         while (!DoubleInterval.areIdentical(number,Double.POSITIVE_INFINITY)) {
-            dataValues.add(number);
+            dataValues.add(Double.valueOf(number));
             number=DoubleInterval.nextDouble(number);
         }
-        dataValues.add(Double.POSITIVE_INFINITY);
+        dataValues.add(Double.valueOf(Double.POSITIVE_INFINITY));
     }
     @Override
     public String toString() {

@@ -125,6 +125,7 @@ import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
 import com.google.common.base.Optional;
 /**OWLClausification.*/
 public class OWLClausification {
+    private static final String INVALID_NORMAL_FORM = "Internal error: invalid normal form.";
     protected static final Variable X=Variable.create("X");
     protected static final Variable Y=Variable.create("Y");
     protected static final Variable Z=Variable.create("Z");
@@ -146,11 +147,9 @@ public class OWLClausification {
         OWLDataFactory factory=rootOntology.getOWLOntologyManager().getOWLDataFactory();
         Optional<IRI> defaultDocumentIRI = rootOntology.getOntologyID().getDefaultDocumentIRI();
         String ontologyIRI=defaultDocumentIRI.isPresent()?defaultDocumentIRI.get().toString(): "urn:hermit:kb" ;
-        Collection<OWLOntology> importClosure=rootOntology.getImportsClosure();
         OWLAxioms axioms=new OWLAxioms();
         OWLNormalization normalization=new OWLNormalization(factory,axioms,0);
-        for (OWLOntology ontology : importClosure)
-            normalization.processOntology(ontology);
+        normalization.processOntology(rootOntology);
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms);
         ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(axioms);
@@ -159,10 +158,8 @@ public class OWLClausification {
         // expressed as concept assertions so that transitivity rewriting applies properly.
         objectPropertyInclusionManager.rewriteNegativeObjectPropertyAssertions(factory,axioms,normalization.m_definitions.size());
         objectPropertyInclusionManager.rewriteAxioms(factory,axioms,0);
-        if (descriptionGraphs==null)
-            descriptionGraphs=Collections.emptySet();
         OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
-        DLOntology dlOntology=clausify(factory,ontologyIRI,axioms,axiomsExpressivity,descriptionGraphs);
+        DLOntology dlOntology=clausify(factory,ontologyIRI,axioms,axiomsExpressivity,descriptionGraphs!=null?descriptionGraphs:Collections.emptySet());
         return new Object[] { objectPropertyInclusionManager,dlOntology };
     }
     /**
@@ -306,10 +303,10 @@ public class OWLClausification {
                 headAtoms.add(Atom.create(AtomicConcept.create(owlClass.getIRI().toString()),X2));
             }
             else
-                throw new IllegalStateException("Internal error: invalid normal form.");
+                throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
         else
-            throw new IllegalStateException("Internal error: invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
         int yIndex=1;
         // object properties always go to the body
         for (OWLObjectPropertyExpression p : object.getObjectPropertyExpressions()) {
@@ -358,11 +355,11 @@ public class OWLClausification {
         else if (description instanceof OWLObjectComplementOf) {
             OWLClassExpression internal=((OWLObjectComplementOf)description).getOperand();
             if (!(internal instanceof OWLClass))
-                throw new IllegalStateException("Internal error: invalid normal form.");
+                throw new IllegalStateException(INVALID_NORMAL_FORM);
             return AtomicConcept.create(((OWLClass)internal).getIRI().toString()).getNegation();
         }
         else
-            throw new IllegalStateException("Internal error: invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
     }
     protected static Role getRole(OWLObjectPropertyExpression objectPropertyExpression) {
         if (objectPropertyExpression instanceof OWLObjectProperty)
@@ -370,11 +367,11 @@ public class OWLClausification {
         else if (objectPropertyExpression instanceof OWLObjectInverseOf) {
             OWLObjectPropertyExpression internal=((OWLObjectInverseOf)objectPropertyExpression).getInverse();
             if (!(internal instanceof OWLObjectProperty))
-                throw new IllegalStateException("Internal error: invalid normal form.");
+                throw new IllegalStateException(INVALID_NORMAL_FORM);
             return AtomicRole.create(((OWLObjectProperty)internal).getIRI().toString()).getInverse();
         }
         else
-            throw new IllegalStateException("Internal error: invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
     }
     protected static AtomicRole getAtomicRole(OWLDataPropertyExpression dataPropertyExpression) {
         return AtomicRole.create(((OWLDataProperty)dataPropertyExpression).getIRI().toString());
@@ -475,11 +472,11 @@ public class OWLClausification {
         }
         @Override
         public void visit(OWLObjectIntersectionOf object) {
-            throw new IllegalStateException("Internal error: invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
         @Override
         public void visit(OWLObjectUnionOf object) {
-            throw new IllegalStateException("Internal error: invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
         @Override
         public void visit(OWLObjectComplementOf object) {
@@ -494,7 +491,7 @@ public class OWLClausification {
                 m_bodyAtoms.add(Atom.create(getConceptForNominal(individual),X));
             }
             else if (!(description instanceof OWLClass))
-                throw new IllegalStateException("Internal error: invalid normal form.");
+                throw new IllegalStateException(INVALID_NORMAL_FORM);
             else
                 m_bodyAtoms.add(Atom.create(AtomicConcept.create(((OWLClass)description).getIRI().toString()),X));
         }
@@ -554,14 +551,14 @@ public class OWLClausification {
                     m_bodyAtoms.add(Atom.create(getConceptForNominal(individual),y));
                 }
                 else
-                    throw new IllegalStateException("Internal error: invalid normal form.");
+                    throw new IllegalStateException(INVALID_NORMAL_FORM);
             }
             else
-                throw new IllegalStateException("Internal error: invalid normal form.");
+                throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
         @Override
         public void visit(OWLObjectHasValue object) {
-            throw new IllegalStateException("Internal error: invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
         @Override
         public void visit(OWLObjectHasSelf object) {
@@ -630,7 +627,7 @@ public class OWLClausification {
         }
         @Override
         public void visit(OWLObjectExactCardinality object) {
-            throw new IllegalStateException("Internal error: invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
         @Override
         public void visit(OWLDataSomeValuesFrom object) {
@@ -663,7 +660,7 @@ public class OWLClausification {
         }
         @Override
         public void visit(OWLDataHasValue object) {
-            throw new IllegalStateException("Internal error: Invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
         @Override
         public void visit(OWLDataMinCardinality object) {
@@ -700,7 +697,7 @@ public class OWLClausification {
         }
         @Override
         public void visit(OWLDataExactCardinality object) {
-            throw new IllegalStateException("Internal error: invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
     }
 
@@ -753,11 +750,11 @@ public class OWLClausification {
         }
         @Override
         public void visit(OWLDataIntersectionOf dr) {
-            throw new IllegalStateException("Internal error: invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
         @Override
         public void visit(OWLDataUnionOf dr) {
-            throw new IllegalStateException("Internal error: invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
         private static String datatypeIRI(OWLDataRange r) {
             if(r.isDatatype()) {
@@ -909,11 +906,11 @@ public class OWLClausification {
         }
         @Override
         public Object visit(OWLDataIntersectionOf node) {
-            throw new IllegalStateException("Internal error: invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
         @Override
         public Object visit(OWLDataUnionOf node) {
-            throw new IllegalStateException("Internal error: invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
     }
 
@@ -962,7 +959,7 @@ public class OWLClausification {
                 m_negativeFacts.add(getRoleAtom(self.getProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
             }
             else
-                throw new IllegalStateException("Internal error: invalid normal form.");
+                throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
         @Override
         public void visit(OWLObjectPropertyAssertionAxiom object) {
@@ -984,7 +981,7 @@ public class OWLClausification {
         }
     }
 
-    protected final static class NormalizedRuleClausifier implements SWRLObjectVisitorEx<Atom> {
+    protected static final class NormalizedRuleClausifier implements SWRLObjectVisitorEx<Atom> {
         protected final Set<OWLObjectProperty> m_objectPropertiesOccurringInOWLAxioms;
         protected final DataRangeConverter m_dataRangeConverter;
         protected final Set<DLClause> m_dlClauses;

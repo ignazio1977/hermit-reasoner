@@ -80,7 +80,7 @@ public final class ExtensionManager implements Serializable {
                     return ((Node)m_tupleTable.getTupleObject(tupleIndex,1)).isActive();
                 }
             };
-        m_extensionTablesByArity.put(new Integer(2),m_binaryExtensionTable);
+        m_extensionTablesByArity.put(Integer.valueOf(2),m_binaryExtensionTable);
         m_ternaryExtensionTable=
             new ExtensionTableWithTupleIndexes(m_tableau,3,!m_tableau.isDeterministic(),
                 new TupleIndex[] {
@@ -101,7 +101,7 @@ public final class ExtensionManager implements Serializable {
                         && ((Node)m_tupleTable.getTupleObject(tupleIndex,2)).isActive();
                 }
             };
-        m_extensionTablesByArity.put(new Integer(3),m_ternaryExtensionTable);
+        m_extensionTablesByArity.put(Integer.valueOf(3),m_ternaryExtensionTable);
         for (DescriptionGraph descriptionGraph : m_tableau.m_permanentDLOntology.getAllDescriptionGraphs()) {
             Integer arityInteger=Integer.valueOf(descriptionGraph.getNumberOfVertices()+1);
             if (!m_extensionTablesByArity.containsKey(arityInteger))
@@ -180,7 +180,7 @@ public final class ExtensionManager implements Serializable {
         case 3:
             return m_ternaryExtensionTable;
         default:
-            return m_extensionTablesByArity.get(arity);
+            return m_extensionTablesByArity.get(Integer.valueOf(arity));
         }
     }
     /**
@@ -309,6 +309,13 @@ public final class ExtensionManager implements Serializable {
             return m_ternaryExtensionTable.containsTuple(m_ternaryAuxiliaryTupleContains);
         }
     }
+    /**
+     * @param dlPredicate predicate
+     * @param node0 node
+     * @param node1 node
+     * @param node2 node
+     * @return true if contined
+     */
     public boolean containsAssertion(DLPredicate dlPredicate,Node node0,Node node1,Node node2) {
         m_fouraryAuxiliaryTupleContains[0]=dlPredicate;
         m_fouraryAuxiliaryTupleContains[1]=node0;
@@ -355,6 +362,11 @@ public final class ExtensionManager implements Serializable {
             return m_binaryExtensionTable.getDependencySet(m_binaryAuxiliaryTupleContains);
         }
     }
+    /**
+     * @param range range
+     * @param node node
+     * @return dependency set
+     */
     public DependencySet getDataRangeAssertionDependencySet(DataRange range,Node node) {
         if (InternalDatatype.RDFS_LITERAL.equals(range))
             return m_dependencySetFactory.emptySet();
@@ -364,6 +376,12 @@ public final class ExtensionManager implements Serializable {
             return m_binaryExtensionTable.getDependencySet(m_binaryAuxiliaryTupleContains);
         }
     }
+    /**
+     * @param role role
+     * @param nodeFrom node from
+     * @param nodeTo node to
+     * @return dependency set
+     */
     public DependencySet getRoleAssertionDependencySet(Role role,Node nodeFrom,Node nodeTo) {
         if (role instanceof AtomicRole) {
             m_ternaryAuxiliaryTupleContains[0]=role;
@@ -403,6 +421,13 @@ public final class ExtensionManager implements Serializable {
             return m_ternaryExtensionTable.getDependencySet(m_ternaryAuxiliaryTupleContains);
         }
     }
+    /**
+     * @param dlPredicate predicate
+     * @param node0 node
+     * @param node1 node
+     * @param node2 node
+     * @return dependency set
+     */
     public DependencySet getAssertionDependencySet(DLPredicate dlPredicate,Node node0,Node node1,Node node2) {
         m_fouraryAuxiliaryTupleContains[0]=dlPredicate;
         m_fouraryAuxiliaryTupleContains[1]=node0;
@@ -410,12 +435,20 @@ public final class ExtensionManager implements Serializable {
         m_fouraryAuxiliaryTupleContains[3]=node2;
         return getTupleDependencySet(m_fouraryAuxiliaryTupleContains);
     }
+    /**
+     * @param tuple tuple
+     * @return dependency set
+     */
     public DependencySet getTupleDependencySet(Object[] tuple) {
         if (tuple.length==0)
             return m_clashDependencySet;
         else
             return getExtensionTable(tuple.length).getDependencySet(tuple);
     }
+    /**
+     * @param tuple tuple
+     * @return true if core
+     */
     public boolean isCore(Object[] tuple) {
         if (tuple.length==0)
             return true;

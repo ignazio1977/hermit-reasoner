@@ -24,20 +24,34 @@ import java.util.List;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
+/**
+ * Plain literal length subset.
+ */
 public class RDFPlainLiteralLengthValueSpaceSubset implements ValueSpaceSubset {
     protected final List<RDFPlainLiteralLengthInterval> m_intervals;
     
+    /** No intervals. */
     public RDFPlainLiteralLengthValueSpaceSubset() {
         m_intervals=Collections.emptyList();
     }
+    /**
+     * @param interval interval
+     */
     public RDFPlainLiteralLengthValueSpaceSubset(RDFPlainLiteralLengthInterval interval) {
         m_intervals=Collections.singletonList(interval);
     }
+    /**
+     * @param interval1 first interval
+     * @param interval2 second interval
+     */
     public RDFPlainLiteralLengthValueSpaceSubset(RDFPlainLiteralLengthInterval interval1,RDFPlainLiteralLengthInterval interval2) {
         m_intervals=new ArrayList<>(2);
         m_intervals.add(interval1);
         m_intervals.add(interval2);
     }
+    /**
+     * @param intervals intervals
+     */
     public RDFPlainLiteralLengthValueSpaceSubset(List<RDFPlainLiteralLengthInterval> intervals) {
         m_intervals=intervals;
     }

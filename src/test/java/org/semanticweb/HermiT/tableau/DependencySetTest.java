@@ -89,7 +89,8 @@ public class DependencySetTest extends TestCase {
         assertDSEquals(set4, 1, 2, 3, 10, 14, 17, 18);
     }
 
-    protected static void assertDSEquals(PermanentDependencySet dependencySet, int... expectedSortedMembers) {
+    protected static void assertDSEquals(PermanentDependencySet set, int... expectedSortedMembers) {
+        PermanentDependencySet dependencySet=set;
         PermanentDependencySet checkSet = dependencySet;
         for (int index = expectedSortedMembers.length - 1; index >= 0; --index) {
             int expectedBranchingPoint = expectedSortedMembers[index];

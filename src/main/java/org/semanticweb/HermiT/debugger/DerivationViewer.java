@@ -24,8 +24,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.Serializable;
 
 import javax.swing.*;
@@ -60,12 +58,7 @@ public class DerivationViewer extends JFrame {
         JScrollPane scrollPane=new JScrollPane(m_derivationTree);
         scrollPane.setPreferredSize(new Dimension(600,400));
         JButton button=new JButton("Refresh");
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                refresh();
-            }
-        });
+        button.addActionListener(e->refresh());
         JPanel panel=new JPanel(new BorderLayout());
         panel.add(scrollPane,BorderLayout.CENTER);
         panel.add(button,BorderLayout.SOUTH);
@@ -199,7 +192,7 @@ public class DerivationViewer extends JFrame {
         public Component getTreeCellRendererComponent(JTree tree,Object value,boolean s,boolean expanded,boolean leaf,int row,boolean focus) {
             DerivationHistory.Fact fact=(DerivationHistory.Fact)value;
             DerivationHistory.Derivation derivation=fact.getDerivation();
-            StringBuffer text=new StringBuffer();
+            StringBuilder text=new StringBuilder();
             text.append(fact.toString(m_prefixes));
             text.append(derivation.toString(m_prefixes));
             super.getTreeCellRendererComponent(tree,text.toString(),s,expanded,leaf,row,focus);

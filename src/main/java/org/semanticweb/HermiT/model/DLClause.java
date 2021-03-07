@@ -53,7 +53,7 @@ public class DLClause implements Serializable {
      * @return atoms
      */
     public Atom[] getHeadAtoms() {
-        return m_headAtoms.clone();
+        return m_headAtoms;
     }
     /**
      * @return body length
@@ -72,7 +72,7 @@ public class DLClause implements Serializable {
      * @return body atoms
      */
     public Atom[] getBodyAtoms() {
-        return m_bodyAtoms.clone();
+        return m_bodyAtoms;
     }
     /**
      * @param safeMakingPredicate safeMakingPredicate
@@ -120,11 +120,7 @@ public class DLClause implements Serializable {
      * @return changed dl clause
      */
     public DLClause getChangedDLClause(Atom[] headAtoms,Atom[] bodyAtoms) {
-        if (headAtoms==null)
-            headAtoms=m_headAtoms;
-        if (bodyAtoms==null)
-            bodyAtoms=m_bodyAtoms;
-        return DLClause.create(headAtoms,bodyAtoms);
+        return DLClause.create(headAtoms!=null?headAtoms:m_headAtoms,bodyAtoms!=null?bodyAtoms:m_bodyAtoms);
     }
     /**
      * @return true if gci
@@ -264,7 +260,7 @@ public class DLClause implements Serializable {
      * @return toString
      */
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {
             if (headIndex!=0)
                 buffer.append(" v ");
@@ -283,7 +279,7 @@ public class DLClause implements Serializable {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
 
-    protected final static InterningManager<DLClause> s_interningManager=new InterningManager<DLClause>() {
+    protected static final InterningManager<DLClause> s_interningManager = new InterningManager<DLClause>() {
         @Override
         protected boolean equal(DLClause object1,DLClause object2) {
             if (object1.m_headAtoms.length!=object2.m_headAtoms.length || object1.m_bodyAtoms.length!=object2.m_bodyAtoms.length)

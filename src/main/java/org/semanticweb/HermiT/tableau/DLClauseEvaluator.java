@@ -127,7 +127,7 @@ public class DLClauseEvaluator implements Serializable {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         int maximalPCLength=String.valueOf(m_workers.length-1).length();
         for (int programCounter=0;programCounter<m_workers.length;programCounter++) {
             String programCounterString=String.valueOf(programCounter);
@@ -204,7 +204,7 @@ public class DLClauseEvaluator implements Serializable {
                         if (term instanceof Variable)
                             variables.add((Variable)term);
                         else
-                            m_bodyNonvariableTermsToIndexes.put(term,-1);
+                            m_bodyNonvariableTermsToIndexes.put(term,Integer.valueOf(-1));
                     }
                 }
                 if (variables.size()>maxNumberOfVariables)
@@ -222,7 +222,7 @@ public class DLClauseEvaluator implements Serializable {
                 Node termNode=termsToNodes.get(entry.getKey());
                 if (termNode==null)
                     throw new IllegalArgumentException("Term '"+entry.getValue()+"' is unknown to the reasoner.");
-                entry.setValue(bindingIndex);
+                entry.setValue(Integer.valueOf(bindingIndex));
                 m_valuesBuffer[bindingIndex]=termNode.getCanonicalNode();
                 bindingIndex++;
             }
@@ -273,8 +273,8 @@ public class DLClauseEvaluator implements Serializable {
             m_buckets=newBuckets;
             m_threshold=(int)(newCapacity*0.75);
         }
-        protected static int getIndexFor(int _hashCode,int tableLength) {
-            int hashCode=_hashCode;
+        protected static int getIndexFor(int c,int tableLength) {
+            int hashCode=c;
             hashCode+=~(hashCode << 9);
             hashCode^=(hashCode >>> 14);
             hashCode+=(hashCode << 4);
@@ -859,7 +859,7 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
     /**ConjunctionCompiler.*/
-    public static abstract class ConjunctionCompiler {
+    public abstract static class ConjunctionCompiler {
         protected final BufferSupply m_bufferSupply;
         protected final ValuesBufferManager m_valuesBufferManager;
         protected final ExtensionManager m_extensionManager;
@@ -933,7 +933,7 @@ public class DLClauseEvaluator implements Serializable {
                     BranchingWorker branchingWorker=(BranchingWorker)worker;
                     int branchingAddress=branchingWorker.getBranchingAddress();
                     if (branchingAddress<0) {
-                        int resolvedAddress=m_labels.get(-branchingAddress);
+                        int resolvedAddress=m_labels.get(-branchingAddress).intValue();
                         branchingWorker.setBranchingAddress(resolvedAddress);
                     }
                 }

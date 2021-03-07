@@ -160,9 +160,7 @@ public class DateTimeInterval {
         long timeOnTimeline=dateTime.getTimeOnTimeline();
         if (m_lowerBound>timeOnTimeline || (m_lowerBound==timeOnTimeline && m_lowerBoundType==BoundType.EXCLUSIVE))
             return false;
-        if (m_upperBound<timeOnTimeline || (m_upperBound==timeOnTimeline && m_upperBoundType==BoundType.EXCLUSIVE))
-            return false;
-        return true;
+        return !(m_upperBound<timeOnTimeline || (m_upperBound==timeOnTimeline && m_upperBoundType==BoundType.EXCLUSIVE));
     }
     /**
      * @param dateTimes dateTimes
@@ -212,7 +210,7 @@ public class DateTimeInterval {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append(m_intervalType.toString());
         if (m_lowerBoundType==BoundType.INCLUSIVE)
             buffer.append('[');

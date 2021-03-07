@@ -93,7 +93,7 @@ public class ProtegeReasonerFactory extends AbstractProtegeOWLReasonerInfo {
 
             configuration.prepareReasonerInferences=prepareReasonerInferences;
         }
-        catch (java.lang.NoSuchMethodException e) {
+        catch (@SuppressWarnings("unused") NoSuchMethodException e) {
             // do nothing, prepareReasoner() will just execute all methods because the user's Protege
             // version does not yet have the reasoner preferences tab that we can use to customize
             // prepareReasoner()

@@ -105,7 +105,7 @@ public class BuiltInPropertyManager {
         // SymmetricObjectProperty( owl:topObjectProperty )
         axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { m_topObjectProperty,m_topObjectProperty.getInverseProperty() });
         // SubClassOf( owl:Thing ObjectSomeValuesFrom( owl:topObjectProperty ObjectOneOf( <internal:nam#topIndividual> ) ) )
-        OWLIndividual newIndividual=m_factory.getOWLNamedIndividual(IRI.create("internal:nam#topIndividual"));
+        OWLIndividual newIndividual=m_factory.getOWLNamedIndividual(IRI.create("internal:nam#","topIndividual"));
         OWLObjectOneOf oneOfNewIndividual=m_factory.getOWLObjectOneOf(newIndividual);
         OWLObjectSomeValuesFrom hasTopNewIndividual=m_factory.getOWLObjectSomeValuesFrom(m_topObjectProperty,oneOfNewIndividual);
         axioms.m_conceptInclusions.add(new OWLClassExpression[] { hasTopNewIndividual });

@@ -52,6 +52,9 @@ import org.semanticweb.owlapi.model.OWLObjectOneOf;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 
+/**
+ * Expression manager.
+ */
 public class ExpressionManager {
     protected final OWLDataFactory m_factory;
     protected final DescriptionNNFVisitor m_descriptionNNFVisitor;
@@ -61,6 +64,9 @@ public class ExpressionManager {
     protected final DescriptionSimplificationVisitor m_descriptionSimplificationVisitor;
     protected final DataRangeSimplificationVisitor m_dataRangeSimplificationVisitor;
     
+    /**
+     * @param factory factory
+     */
     public ExpressionManager(OWLDataFactory factory) {
         m_factory=factory;
         m_descriptionNNFVisitor=new DescriptionNNFVisitor();
@@ -70,21 +76,45 @@ public class ExpressionManager {
         m_descriptionSimplificationVisitor=new DescriptionSimplificationVisitor();
         m_dataRangeSimplificationVisitor=new DataRangeSimplificationVisitor();
     }
+    /**
+     * @param description description
+     * @return normalised form
+     */
     public OWLClassExpression getNNF(OWLClassExpression description) {
         return description.accept(m_descriptionNNFVisitor);
     }
+    /**
+     * @param dataRange description
+     * @return normalised form
+     */
     public OWLDataRange getNNF(OWLDataRange dataRange) {
         return dataRange.accept(m_dataRangeNNFVisitor);
     }
+    /**
+     * @param description description
+     * @return normalised form
+     */
     public OWLClassExpression getComplementNNF(OWLClassExpression description) {
         return description.accept(m_descriptionComplementNNFVisitor);
     }
+    /**
+     * @param dataRange description
+     * @return normalised form
+     */
     public OWLDataRange getComplementNNF(OWLDataRange dataRange) {
         return dataRange.accept(m_dataRangeComplementNNFVisitor);
     }
+    /**
+     * @param description description
+     * @return normalised form
+     */
     public OWLClassExpression getSimplified(OWLClassExpression description) {
         return description.accept(m_descriptionSimplificationVisitor);
     }
+    /**
+     * @param dataRange description
+     * @return normalised form
+     */
     public OWLDataRange getSimplified(OWLDataRange dataRange) {
         return dataRange.accept(m_dataRangeSimplificationVisitor);
     }

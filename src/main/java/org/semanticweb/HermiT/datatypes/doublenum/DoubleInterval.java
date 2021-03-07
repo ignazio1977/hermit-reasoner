@@ -82,14 +82,14 @@ public class DoubleInterval {
         // We know that the interval is not empty; hence, neither bound is NaN.
         double number=m_lowerBoundInclusive;
         while (!areIdentical(number,m_upperBoundInclusive)) {
-            numbers.add(number);
+            numbers.add(Double.valueOf(number));
             number=nextDouble(number);
         }
-        numbers.add(m_upperBoundInclusive);
+        numbers.add(Double.valueOf(m_upperBoundInclusive));
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("DOUBLE[");
         buffer.append(m_lowerBoundInclusive);
         buffer.append("..");
@@ -133,7 +133,7 @@ public class DoubleInterval {
                 newPositive=true;
                 newMagnitude=magnitude+1;
             }
-            else if (!positive && magnitude==0) {
+            else if (magnitude==0) {
                 // The successor of -0 is +0
                 newPositive=true;
                 newMagnitude=0;
@@ -164,7 +164,7 @@ public class DoubleInterval {
                 newPositive=false;
                 newMagnitude=magnitude+1;
             }
-            else if (positive && magnitude==0) {
+            else if (magnitude==0) {
                 // The predecessor of +0 is -0
                 newPositive=false;
                 newMagnitude=0;
@@ -180,10 +180,11 @@ public class DoubleInterval {
     /**
      * @param lowerBoundInclusive lowerBoundInclusive
      * @param upperBoundInclusive upperBoundInclusive
-     * @param argument argument
+     * @param arg argument
      * @return subtracted size
      */
-    public static int subtractIntervalSizeFrom(double lowerBoundInclusive,double upperBoundInclusive,int argument) {
+    public static int subtractIntervalSizeFrom(double lowerBoundInclusive,double upperBoundInclusive,int arg) {
+        int argument=arg;
         if (argument<=0)
             return 0;
         long bitsLowerBoundInclusive=Double.doubleToRawLongBits(lowerBoundInclusive);
@@ -208,7 +209,7 @@ public class DoubleInterval {
             long size=magnitudeLowerBoundInclusive-magnitudeUpperBoundInclusive+1;
             return (int)Math.max((argument)-size,0);
         }
-        else if (!positiveLowerBoundInclusive && positiveUpperBoundInclusive) {
+        else if (!positiveLowerBoundInclusive) {
             // the number of values from 'lowerBoundInclusive' to -0
             long startToMinusZero=magnitudeLowerBoundInclusive+1;
             if (startToMinusZero>=argument)
@@ -271,9 +272,9 @@ public class DoubleInterval {
             return magnitude1<=magnitude2;
         else if (!positive1 && positive2)
             return true;
-        else if (positive1 && !positive2)
+        else if (positive1)
             return false;
-        else // if (!positive1 && !positive2)
+        else
             return magnitude1>=magnitude2;
     }
 }

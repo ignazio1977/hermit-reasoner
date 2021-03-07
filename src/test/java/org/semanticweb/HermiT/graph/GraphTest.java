@@ -178,7 +178,7 @@ public class GraphTest extends AbstractReasonerTest {
 
     protected static void add(Graph<Integer> graph, int from, int... successors) {
         for (int successor : successors)
-            graph.addEdge(from, successor);
+            graph.addEdge(Integer.valueOf(from), Integer.valueOf(successor));
     }
 
     protected static DescriptionGraph G(String[] vertexAtomicConcepts, DescriptionGraph.Edge[] edges,

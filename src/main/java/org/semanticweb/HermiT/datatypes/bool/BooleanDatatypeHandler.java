@@ -32,16 +32,16 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_BOOLEAN=Prefixes.s_semanticWebPrefixes.get("xsd:")+"boolean";
     protected static final ValueSpaceSubset BOOLEAN_ALL=new BooleanAll();
     protected static final ValueSpaceSubset EMPTY=new BooleanNone();
-    protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_BOOLEAN);
+    protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_BOOLEAN);
 
     @Override
     public Set<String> getManagedDatatypeURIs() {
         return s_managedDatatypeURIs;
     }
     @Override
-    public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
+    public Object parseLiteral(String form,String datatypeURI) throws MalformedLiteralException {
         assert XSD_BOOLEAN.equals(datatypeURI);
-        lexicalForm=lexicalForm.trim();
+        String lexicalForm=form.trim();
         if ("false".equalsIgnoreCase(lexicalForm) || "0".equals(lexicalForm))
             return Boolean.FALSE;
         else if ("true".equalsIgnoreCase(lexicalForm) || "1".equals(lexicalForm))
@@ -115,6 +115,7 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
         }
         @Override
         public void enumerateDataValues(Collection<Object> dataValues) {
+            // nothing to do
         }
     }
 }

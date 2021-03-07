@@ -19,7 +19,9 @@ package org.semanticweb.HermiT.datatypes.owlreal;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
+/**
+ * Numbers.
+ */
 public class Numbers {
     protected enum NumberType {
         INTEGER, LONG, BIG_INTEGER, BIG_DECIMAL, BIG_RATIONAL;
@@ -44,6 +46,10 @@ public class Numbers {
         }
     } 
     
+    /**
+     * @param n number
+     * @return true if valid
+     */
     public static boolean isValidNumber(Number n) {
         return (n instanceof Integer) || (n instanceof Long) || (n instanceof BigInteger) || (n instanceof BigDecimal) || (n instanceof BigRational);
     }
@@ -56,12 +62,12 @@ public class Numbers {
      */
     public static Number parseInteger(String string) throws NumberFormatException {
         try {
-            return Integer.parseInt(string);
+            return Integer.valueOf(string);
         }
         catch (@SuppressWarnings("unused") NumberFormatException e) {
         }
         try {
-            return Long.parseLong(string);
+            return Long.valueOf(string);
         }
         catch (@SuppressWarnings("unused") NumberFormatException e) {
         }
@@ -77,12 +83,12 @@ public class Numbers {
     public static Number parseDecimal(String string) throws NumberFormatException {
         BigDecimal decimal=new BigDecimal(string);
         try {
-            return decimal.intValueExact();
+            return Integer.valueOf(decimal.intValueExact());
         }
         catch (@SuppressWarnings("unused") ArithmeticException e) {
         }
         try {
-            return decimal.longValueExact();
+            return Long.valueOf(decimal.longValueExact());
         }
         catch (@SuppressWarnings("unused") ArithmeticException e) {
         }
@@ -117,9 +123,9 @@ public class Numbers {
         if (denominator.equals(BigInteger.ONE)) {
             int numeratorBitCount=numerator.bitCount();
             if (numeratorBitCount<=32)
-                return numerator.intValue();
+                return Integer.valueOf(numerator.intValue());
             else if (numeratorBitCount<=64)
-                return numerator.longValue();
+                return Long.valueOf( numerator.longValue());
             else
                 return numerator;
         }
@@ -130,6 +136,11 @@ public class Numbers {
         }
         return new BigRational(numerator,denominator);
     }
+    /**
+     * @param n1 number 
+     * @param n2 number
+     * @return comparison result
+     */
     public static int compare(Number n1,Number n2) {
         if (n1.equals(n2))
             return 0;
@@ -141,31 +152,26 @@ public class Numbers {
         NumberType typeN2=NumberType.getNumberTypeFor(n2);
         NumberType maxType=NumberType.getMaxNumberType(typeN1,typeN2);
         switch (maxType) {
-        case INTEGER: {
+        case INTEGER:
                 int iv1=n1.intValue();
                 int iv2=n2.intValue();
-                return iv1<iv2 ? -1 : (iv1==iv2 ? 0 : 1);
-            }
-        case LONG: {
+                return Integer.compare(iv1, iv2);
+        case LONG:
                 long lv1=n1.longValue();
                 long lv2=n2.longValue();
-                return lv1<lv2 ? -1 : (lv1==lv2 ? 0 : 1);
-            }
-        case BIG_INTEGER: {
+                return Long.compare(lv1, lv2);
+        case BIG_INTEGER:
                 BigInteger bi1=toBigInteger(n1,typeN1);
                 BigInteger bi2=toBigInteger(n2,typeN2);
                 return bi1.compareTo(bi2);
-            }
-        case BIG_DECIMAL: {
+        case BIG_DECIMAL:
                 BigDecimal bd1=toBigDecimal(n1,typeN1);
                 BigDecimal bd2=toBigDecimal(n2,typeN2);
                 return bd1.compareTo(bd2);
-            }
-        case BIG_RATIONAL: {
+        case BIG_RATIONAL:
                 BigRational br1=toBigRational(n1,typeN1);
                 BigRational br2=toBigRational(n2,typeN2);
                 return br1.compareTo(br2);
-            }
         default:
             throw new IllegalArgumentException();
         }
@@ -215,12 +221,11 @@ public class Numbers {
             return new BigRational(BigInteger.valueOf(n.longValue()),BigInteger.ONE);
         case BIG_INTEGER:
             return new BigRational((BigInteger)n,BigInteger.ONE);
-        case BIG_DECIMAL: {
+        case BIG_DECIMAL:
                 BigDecimal decimal=(BigDecimal)n;
                 // This method assumes that all BigDecimals actually have some decimal digits.
                 assert decimal.scale()>0;
                 return new BigRational(decimal.unscaledValue(),BigInteger.TEN.pow(decimal.scale()));
-            }
         case BIG_RATIONAL: 
             return (BigRational)n;
         default:
@@ -228,10 +233,26 @@ public class Numbers {
         }
     }
     
-    public static enum BoundaryDirection {
-        UPPER,LOWER
+    /**
+     * Boundary direction.
+     */
+    public enum BoundaryDirection {
+        /**
+         * Upper.
+         */
+        UPPER,
+        /**
+         * Lower.
+         */
+        LOWER
     }
     
+    /**
+     * @param bound bound
+     * @param boundaryDirection boundary direction
+     * @param boundIsInclusive bound inclusive
+     * @return nearest integer
+     */
     public static Number getNearestIntegerInBound(Number bound,BoundaryDirection boundaryDirection,boolean boundIsInclusive) {
         switch (NumberType.getNumberTypeFor(bound)) {
         case INTEGER:
@@ -240,16 +261,16 @@ public class Numbers {
             else if (BoundaryDirection.LOWER.equals(boundaryDirection)) {
                 int value=bound.intValue();
                 if (value==Integer.MAX_VALUE)
-                    return ((long)value)+1;
+                    return Long.valueOf(((long)value)+1);
                 else
-                    return value+1;
+                    return Integer.valueOf(value+1);
             }
             else {
                 int value=bound.intValue();
                 if (value==Integer.MIN_VALUE)
-                    return ((long)value)-11;
+                    return Long.valueOf(((long)value)-1);
                 else
-                    return value-1;
+                    return Integer.valueOf(value-1);
             }
         case LONG:
             if (boundIsInclusive)
@@ -259,14 +280,14 @@ public class Numbers {
                 if (value==Long.MAX_VALUE)
                     return BigInteger.valueOf(value).add(BigInteger.ONE);
                 else
-                    return value+1;
+                    return Long.valueOf(value+1);
             }
             else {
                 long value=bound.longValue();
                 if (value==Long.MIN_VALUE)
                     return BigInteger.valueOf(value).subtract(BigInteger.ONE);
                 else
-                    return value-1;
+                    return Long.valueOf( value-1);
             }
         case BIG_INTEGER:
             if (boundIsInclusive)
@@ -275,7 +296,7 @@ public class Numbers {
                 return ((BigInteger)bound).add(BigInteger.ONE);
             else
                 return ((BigInteger)bound).subtract(BigInteger.ONE);
-        case BIG_DECIMAL: {
+        case BIG_DECIMAL:
                 // This method assumes that all BigDecimals actually have some decimal digits.
                 BigDecimal bd=(BigDecimal)bound;
                 assert bd.scale()>0;
@@ -290,13 +311,12 @@ public class Numbers {
                 }
                 int biBitCount=bi.bitCount();
                 if (biBitCount<=32)
-                    return bi.intValue();
+                    return Integer.valueOf(bi.intValue());
                 else if (biBitCount<=64)
-                    return bi.longValue();
+                    return Long.valueOf(bi.longValue());
                 else
                     return bi;
-            }
-        case BIG_RATIONAL: {
+        case BIG_RATIONAL:
                 // This method assumes that all BigRationals are not integers.
                 BigRational br=(BigRational)bound;
                 BigDecimal numerator=new BigDecimal(br.getNumerator());
@@ -312,16 +332,21 @@ public class Numbers {
                 }
                 int quotientBitCount=quotient.bitCount();
                 if (quotientBitCount<=32)
-                    return quotient.intValue();
+                    return Integer.valueOf(quotient.intValue());
                 else if (quotientBitCount<=64)
-                    return quotient.longValue();
+                    return Long.valueOf(quotient.longValue());
                 else
                     return quotient;
-            }
         default:
             throw new IllegalArgumentException();
         }
     }
+    /**
+     * @param lowerBoundInclusive lower bound
+     * @param upperBoundInclusive upper bound
+     * @param argument argument
+     * @return subtraction
+     */
     public static int subtractIntegerIntervalSizeFrom(Number lowerBoundInclusive,Number upperBoundInclusive,int argument) {
         if (argument<=0)
             return 0;
@@ -331,49 +356,48 @@ public class Numbers {
         NumberType typeUpperBound=NumberType.getNumberTypeFor(upperBoundInclusive);
         NumberType maxType=NumberType.getMaxNumberType(typeLowerBound,typeUpperBound);
         switch (maxType) {
-        case INTEGER: {
+        case INTEGER:
                 int size=upperBoundInclusive.intValue()-lowerBoundInclusive.intValue()+1;
                 if (size<=0)
                     return 0;
                 else
                     return Math.max(argument-size,0);
-            }
-        case LONG: {
-                long size=upperBoundInclusive.longValue()-lowerBoundInclusive.longValue()+1;
-                if (size<=0L)
+        case LONG:
+                long s=upperBoundInclusive.longValue()-lowerBoundInclusive.longValue()+1;
+                if (s<=0L)
                     return 0;
                 else
-                    return (int)Math.max((argument)-size,0);
-            }
-        case BIG_INTEGER: {
+                    return (int)Math.max((argument)-s,0);
+        case BIG_INTEGER:
                 BigInteger leftover=BigInteger.valueOf(argument).subtract(toBigInteger(upperBoundInclusive,typeUpperBound)).add(toBigInteger(lowerBoundInclusive,typeLowerBound)).subtract(BigInteger.ONE);
                 if (leftover.compareTo(BigInteger.ZERO)<=0)
                     return 0;
                 else
                     return leftover.intValue();
-            }
         case BIG_DECIMAL:
         case BIG_RATIONAL:
         default:
             throw new IllegalArgumentException();
         }
     }
+    /**
+     * @param integer int
+     * @return next integer
+     */
     public static Number nextInteger(Number integer) {
         switch (NumberType.getNumberTypeFor(integer)) {
-        case INTEGER: {
+        case INTEGER:
                 int value=integer.intValue();
                 if (value==Integer.MAX_VALUE)
-                    return ((long)value)+1;
+                    return Long.valueOf(((long)value)+1);
                 else
-                    return value+1;
-            }
-        case LONG: {
-                long value=integer.longValue();
-                if (value==Long.MAX_VALUE)
-                    return BigInteger.valueOf(value).add(BigInteger.ONE);
+                    return Integer.valueOf(value+1);
+        case LONG:
+                long v=integer.longValue();
+                if (v==Long.MAX_VALUE)
+                    return BigInteger.valueOf(v).add(BigInteger.ONE);
                 else
-                    return value+1;
-            }
+                    return Long.valueOf(v+1);
         case BIG_INTEGER:
             return ((BigInteger)integer).add(BigInteger.ONE);
         case BIG_DECIMAL:

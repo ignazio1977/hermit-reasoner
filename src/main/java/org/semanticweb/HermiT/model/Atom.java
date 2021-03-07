@@ -18,6 +18,7 @@
 package org.semanticweb.HermiT.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,12 +30,7 @@ import org.semanticweb.HermiT.Prefixes;
 public class Atom implements Serializable {
     private static final long serialVersionUID=7884900540178779422L;
     /**Infix predicates.*/
-    public static final Set<DLPredicate> s_infixPredicates=new HashSet<>();
-    static {
-        s_infixPredicates.add(Equality.INSTANCE);
-        s_infixPredicates.add(Inequality.INSTANCE);
-        s_infixPredicates.add(NodeIDLessEqualThan.INSTANCE);
-    }
+    public static final Set<DLPredicate> s_infixPredicates=new HashSet<>(Arrays.asList(Equality.INSTANCE, Inequality.INSTANCE, NodeIDLessEqualThan.INSTANCE));
 
     protected final DLPredicate m_dlPredicate;
     protected final Term[] m_arguments;
@@ -109,7 +105,7 @@ public class Atom implements Serializable {
      * @return toString
      */
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         if (s_infixPredicates.contains(m_dlPredicate)) {
             buffer.append(m_arguments[0].toString(prefixes));
             buffer.append(' ');
@@ -155,7 +151,7 @@ public class Atom implements Serializable {
         return s_interningManager.intern(this);
     }
 
-    protected final static InterningManager<Atom> s_interningManager=new InterningManager<Atom>() {
+    protected static final InterningManager<Atom> s_interningManager=new InterningManager<Atom>() {
         @Override
         protected boolean equal(Atom object1,Atom object2) {
             if (object1.m_dlPredicate!=object2.m_dlPredicate)

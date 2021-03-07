@@ -18,10 +18,10 @@
 package org.semanticweb.HermiT.datatypes.rdfplainliteral;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
@@ -31,41 +31,34 @@ import dk.brics.automaton.BasicOperations;
 import dk.brics.automaton.Datatypes;
 import dk.brics.automaton.RegExp;
 
+/**
+ * Pattern vlue subset.
+ */
 public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
-    public static final char SEPARATOR='\u0001';
-    protected static final Automaton s_separator;
-    protected static final Automaton s_languagePatternEnd;
-    protected static final Automaton s_languageTag;
-    protected static final Automaton s_languageTagOrEmpty;
-    protected static final Automaton s_emptyLangTag;
-    protected static final Automaton s_nonemptyLangTag;
-    protected static final Automaton s_anyLangTag;
-    protected static final Automaton s_xsdString;
-    protected static final Map<String,Automaton> s_anyDatatype;
-    protected static final Automaton s_anyString;
-    protected static final Automaton s_anyChar;
-    protected static final Automaton s_anyStringWithNonemptyLangTag;
-    static {
-        s_separator=BasicAutomata.makeChar(SEPARATOR);
-        s_languagePatternEnd=BasicOperations.optional(BasicAutomata.makeChar('-').concatenate(BasicAutomata.makeAnyString()));
-        s_languageTag=languageTagAutomaton();
-        s_languageTagOrEmpty=s_languageTag.union(BasicAutomata.makeEmptyString());
-        s_emptyLangTag=s_separator;
-        s_nonemptyLangTag=s_separator.concatenate(s_languageTag);
-        s_anyLangTag=s_separator.concatenate(s_languageTagOrEmpty);
-        s_xsdString=Datatypes.get("string");
-        s_anyDatatype=new HashMap<>();
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"string",s_xsdString.concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"normalizedString",normalizedStringAutomaton().concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"token",tokenAutomaton().concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"Name",Datatypes.get("Name2").concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"NCName",Datatypes.get("NCName").concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"NMTOKEN",Datatypes.get("Nmtoken2").concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"language",Datatypes.get("language").concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.RDF_NS+"PlainLiteral",s_xsdString.concatenate(s_anyLangTag));
-        s_anyChar=xmlChar();
-        s_anyString=s_anyChar.repeat();
-        s_anyStringWithNonemptyLangTag=s_anyString.concatenate(s_nonemptyLangTag);
+    private static final char SEPARATOR='\u0001';
+    protected static final Automaton s_separator=BasicAutomata.makeChar(SEPARATOR);
+    protected static final Automaton s_languagePatternEnd=BasicOperations.optional(BasicAutomata.makeChar('-').concatenate(BasicAutomata.makeAnyString()));
+    protected static final Automaton s_languageTag=languageTagAutomaton();
+    protected static final Automaton s_languageTagOrEmpty=s_languageTag.union(BasicAutomata.makeEmptyString());
+    protected static final Automaton s_emptyLangTag=s_separator;
+    protected static final Automaton s_nonemptyLangTag=s_separator.concatenate(s_languageTag);
+    protected static final Automaton s_anyLangTag=s_separator.concatenate(s_languageTagOrEmpty);
+    protected static final Automaton s_xsdString=Datatypes.get("string");
+    protected static final Map<String,Automaton> s_anyDatatype=anyDatatype();
+    protected static final Automaton s_anyChar=xmlChar();
+    protected static final Automaton s_anyString=s_anyChar.repeat();
+    protected static final Automaton s_anyStringWithNonemptyLangTag=s_anyString.concatenate(s_nonemptyLangTag);
+    static Map<String,Automaton> anyDatatype() {
+        Map<String,Automaton> anyDatatype=new ConcurrentHashMap<>(20, 0.75F, 1);
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"string",s_xsdString.concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"normalizedString",normalizedStringAutomaton().concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"token",tokenAutomaton().concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"Name",Datatypes.get("Name2").concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"NCName",Datatypes.get("NCName").concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"NMTOKEN",Datatypes.get("Nmtoken2").concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"language",Datatypes.get("language").concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.RDF_NS+"PlainLiteral",s_xsdString.concatenate(s_anyLangTag));
+        return anyDatatype;
     }
     protected static Automaton languageTagAutomaton() {
         return new RegExp(
@@ -96,6 +89,9 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
     }
     protected final Automaton m_automaton;
 
+    /**
+     * @param automaton automaton
+     */
     public RDFPlainLiteralPatternValueSpaceSubset(Automaton automaton) {
         m_automaton=automaton;
     }
@@ -143,6 +139,10 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
     public String toString() {
         return "rdf:PlainLiteral{"+m_automaton+"}";
     }
+    /**
+     * @param valueSpaceSubset value space
+     * @return automaton
+     */
     public static Automaton toAutomaton(RDFPlainLiteralLengthValueSpaceSubset valueSpaceSubset) {
         List<RDFPlainLiteralLengthInterval> intervals=valueSpaceSubset.m_intervals;
         Automaton result=null;
@@ -169,6 +169,11 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
         }
         return result;
     }
+    /**
+     * @param minLength min length
+     * @param maxLength max length
+     * @return automaton
+     */
     public static Automaton toAutomaton(int minLength,int maxLength) {
         assert minLength<=maxLength;
         Automaton stringPart;
@@ -182,6 +187,10 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
             stringPart=s_anyString.intersection(BasicOperations.repeat(s_anyChar,minLength,maxLength));
         return stringPart.concatenate(s_anyLangTag);
     }
+    /**
+     * @param pattern pattern
+     * @return true if valid
+     */
     @SuppressWarnings("unused")
     public static boolean isValidPattern(String pattern) {
         try {
@@ -192,10 +201,18 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
             return false;
         }
     }
+    /**
+     * @param pattern pattern
+     * @return automaton
+     */
     public static Automaton getPatternAutomaton(String pattern) {
         Automaton stringPart=new RegExp(pattern).toAutomaton();
         return stringPart.concatenate(s_anyLangTag);
     }
+    /**
+     * @param languageRange language range
+     * @return automaton
+     */
     public static Automaton getLanguageRangeAutomaton(String languageRange) {
         if ("*".equals(languageRange))
             return s_anyStringWithNonemptyLangTag;
@@ -204,6 +221,10 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
             return s_anyString.concatenate(s_separator).concatenate(languageTagPart);
         }
     }
+    /**
+     * @param datatypeURI datatype uri
+     * @return automaton
+     */
     public static Automaton getDatatypeAutomaton(String datatypeURI) {
         return s_anyDatatype.get(datatypeURI);
     }

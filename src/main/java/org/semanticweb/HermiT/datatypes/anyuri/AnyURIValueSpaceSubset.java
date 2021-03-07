@@ -33,16 +33,10 @@ import dk.brics.automaton.RegExp;
  * AnyURI value subset.
  */
 public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
-    protected static final Automaton s_anyChar;
-    protected static final Automaton s_anyString;
-    protected static final Automaton s_anyURI;
-    protected static final Automaton s_empty;
-    static {
-        s_anyChar=BasicAutomata.makeAnyChar();
-        s_anyString=BasicAutomata.makeAnyString();
-        s_anyURI=Datatypes.get("URI");
-        s_empty=BasicAutomata.makeEmpty();
-    }
+    protected static final Automaton s_anyChar = BasicAutomata.makeAnyChar();
+    protected static final Automaton s_anyString = BasicAutomata.makeAnyString();
+    protected static final Automaton s_anyURI = Datatypes.get("URI");
+    protected static final Automaton s_empty = BasicAutomata.makeEmpty();
 
     protected final Automaton m_automaton;
     
@@ -79,12 +73,17 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("xsd:anyURI{");
         buffer.append(m_automaton.toString());
         buffer.append('}');
         return buffer.toString();
     }
+    /**
+     * @param minLength min lenght
+     * @param maxLength max length
+     * @return automaton
+     */
     public static Automaton toAutomaton(int minLength,int maxLength) {
         assert minLength<=maxLength;
         if (maxLength==Integer.MAX_VALUE) {
@@ -96,6 +95,10 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
         else
             return s_anyString.intersection(BasicOperations.repeat(s_anyChar,minLength,maxLength));
     }
+    /**
+     * @param pattern pattern to compile
+     * @return true if valid
+     */
     @SuppressWarnings("unused")
     public static boolean isValidPattern(String pattern) {
         try {
@@ -106,6 +109,10 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
             return false;
         }
     }
+    /**
+     * @param pattern pattern to compile
+     * @return pattern automaton
+     */
     public static Automaton getPatternAutomaton(String pattern) {
         return new RegExp(pattern).toAutomaton();
     }

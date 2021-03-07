@@ -23,15 +23,24 @@ import java.util.List;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
+/**
+ * Double without NaN subset.
+ */
 public class NoNaNDoubleSubset implements ValueSpaceSubset {
     protected final List<DoubleInterval> m_intervals;
-    
+    /** No intervals. */
     public NoNaNDoubleSubset() {
         m_intervals=Collections.emptyList();
     }
+    /**
+     * @param interval interval
+     */
     public NoNaNDoubleSubset(DoubleInterval interval) {
         m_intervals=Collections.singletonList(interval);
     }
+    /**
+     * @param intervals intervals
+     */
     public NoNaNDoubleSubset(List<DoubleInterval> intervals) {
         m_intervals=intervals;
     }
@@ -45,7 +54,7 @@ public class NoNaNDoubleSubset implements ValueSpaceSubset {
     @Override
     public boolean containsDataValue(Object dataValue) {
         if (dataValue instanceof Double) {
-            double number=(Double)dataValue;
+            double number=((Double)dataValue).doubleValue();
             for (int index=m_intervals.size()-1;index>=0;--index)
                 if (m_intervals.get(index).contains(number))
                     return true;
@@ -59,7 +68,7 @@ public class NoNaNDoubleSubset implements ValueSpaceSubset {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("xsd:double{");
         for (int index=0;index<m_intervals.size();index++) {
             if (index==0)

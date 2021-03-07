@@ -23,15 +23,24 @@ import java.util.List;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
+/**
+ * Float with no NaN subset.
+ */
 public class NoNaNFloatSubset implements ValueSpaceSubset {
     protected final List<FloatInterval> m_intervals;
-    
+    /** No intervals.*/
     public NoNaNFloatSubset() {
         m_intervals=Collections.emptyList();
     }
+    /**
+     * @param interval interval
+     */
     public NoNaNFloatSubset(FloatInterval interval) {
         m_intervals=Collections.singletonList(interval);
     }
+    /**
+     * @param intervals intervals
+     */
     public NoNaNFloatSubset(List<FloatInterval> intervals) {
         m_intervals=intervals;
     }
@@ -45,7 +54,7 @@ public class NoNaNFloatSubset implements ValueSpaceSubset {
     @Override
     public boolean containsDataValue(Object dataValue) {
         if (dataValue instanceof Float) {
-            float number=(Float)dataValue;
+            float number=((Float)dataValue).floatValue();
             for (int index=m_intervals.size()-1;index>=0;--index)
                 if (m_intervals.get(index).contains(number))
                     return true;
@@ -59,7 +68,7 @@ public class NoNaNFloatSubset implements ValueSpaceSubset {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("xsd:float{");
         for (int index=0;index<m_intervals.size();index++) {
             if (index==0)

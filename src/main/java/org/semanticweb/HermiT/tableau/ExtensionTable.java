@@ -27,7 +27,6 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.NegatedAtomicRole;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
-import org.semanticweb.HermiT.tableau.ExtensionTable.View;
 
 /**
  * An extension table keeps track of the assertions in the ABox during a run of
@@ -45,7 +44,7 @@ import org.semanticweb.HermiT.tableau.ExtensionTable.View;
 public abstract class ExtensionTable implements Serializable {
     private static final long serialVersionUID=-5029938218056017193L;
     /**View.*/
-    public static enum View { 
+    public enum View { 
         /**EXTENSION_THIS*/
         EXTENSION_THIS,
         /**EXTENSION_OLD*/
@@ -296,6 +295,9 @@ public abstract class ExtensionTable implements Serializable {
          * @return extension table
          */
         ExtensionTable getExtensionTable();
+        /**
+         * @return extension view
+         */
         View getExtensionView();
         /**
          * Clear.
@@ -480,9 +482,11 @@ public abstract class ExtensionTable implements Serializable {
         }
         @Override
         public void setDependencySet(int tupleIndex,DependencySet dependencySet) {
+            // nothing to do
         }
         @Override
         public void forgetDependencySet(int tupleIndex) {
+            // nothing to do
         }
     }
 
@@ -526,9 +530,11 @@ public abstract class ExtensionTable implements Serializable {
         }
         @Override
         public void addCore(int tupleIndex) {
+            // nothing to do
         }
         @Override
         public void setCore(int tupleIndex,boolean isCore) {
+            // nothing to do
         }
     }
 

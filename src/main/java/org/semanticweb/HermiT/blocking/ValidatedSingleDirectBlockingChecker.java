@@ -61,12 +61,10 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
     }
     @Override
     public boolean isBlockedBy(Node blocker,Node blocked) {
-        boolean isBlockedBy=
-            !blocker.isBlocked() &&
+        return !blocker.isBlocked() &&
             blocker.getNodeType()==NodeType.TREE_NODE &&
             blocked.getNodeType()==NodeType.TREE_NODE &&
             ((ValidatedSingleBlockingObject)blocker.getBlockingObject()).getAtomicConceptsLabel()==((ValidatedSingleBlockingObject)blocked.getBlockingObject()).getAtomicConceptsLabel();
-        return isBlockedBy;
     }
     @Override
     public int blockingHashCode(Node node) {
@@ -181,6 +179,9 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new ValidatedBlockingSignature(this,node);
     }
+    /**
+     * Blocking object.
+     */
     public class ValidatedSingleBlockingObject implements ValidatedBlockingObject {
         protected final Node m_node;
         protected boolean m_hasChangedForBlocking;
@@ -190,9 +191,12 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
         protected Set<AtomicRole> m_fullFromParentLabel;
         protected Set<AtomicRole> m_fullToParentLabel;
         protected int m_blockingRelevantHashCode;
-        public boolean m_blockViolatesParentConstraints=false;
-        public boolean m_hasAlreadyBeenChecked=false;
+        protected boolean m_blockViolatesParentConstraints=false;
+        protected boolean m_hasAlreadyBeenChecked=false;
         
+        /**
+         * @param node node
+         */
         public ValidatedSingleBlockingObject(Node node) {
             m_node=node;
         }

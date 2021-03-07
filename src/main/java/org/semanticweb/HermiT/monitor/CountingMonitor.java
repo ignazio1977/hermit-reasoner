@@ -94,9 +94,9 @@ public class CountingMonitor extends TableauMonitorAdapter {
     @Override
     public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
         super.isSatisfiableFinished(reasoningTaskDescription,result);
-        if (reasoningTaskDescription.flipSatisfiabilityResult())
-            result=!result;
         m_testResult=result;
+        if (reasoningTaskDescription.flipSatisfiabilityResult())
+            m_testResult=!result;
         m_time=System.currentTimeMillis()-m_problemStartTime;
         String messagePattern=m_reasoningTaskDescription.getMessagePattern();
         List<TestRecord> records=m_testRecords.get(messagePattern);
@@ -367,7 +367,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
     }
     protected double getRounded(long nominator, long denominator, int noDecimalPlaces) {
         double number=(double)(nominator)/(double)denominator;
-        int tmp=(int)((number*Math.pow(10,noDecimalPlaces)));
+        int tmp=(int)(number*Math.pow(10,noDecimalPlaces));
         return (tmp/Math.pow(10,noDecimalPlaces));
     }
     /**
@@ -467,23 +467,31 @@ public class CountingMonitor extends TableauMonitorAdapter {
     public static String millisToHoursMinutesSecondsString(long millis) {
         long time=millis/1000;
         long ms=time%1000;
-        String timeStr=String.format(String.format("%%0%dd", 3), ms)+"ms";
-        String format=String.format("%%0%dd", 2);
+        String timeStr=String.format(String.format("%%0%dd", Integer.valueOf(3)), Long.valueOf(ms))+"ms";
+        String format=String.format("%%0%dd", Integer.valueOf(2));
         long secs=time%60;
-        if (secs>0) timeStr=String.format(format, secs)+"s"+timeStr;
+        if (secs>0) timeStr=String.format(format, Long.valueOf(secs))+"s"+timeStr;
         long mins=(time%3600)/60;
-        if (mins>0) timeStr=String.format(format, mins)+"m"+timeStr;
+        if (mins>0) timeStr=String.format(format, Long.valueOf(mins))+"m"+timeStr;
         long hours=time/3600;
-        if (hours>0) timeStr=String.format(format, hours)+"h"+timeStr;
+        if (hours>0) timeStr=String.format(format, Long.valueOf(hours))+"h"+timeStr;
         return timeStr;
     }
 
+	/**
+	 * Test record.
+	 */
 	public static class TestRecord implements Comparable<TestRecord>, Serializable {
         private static final long serialVersionUID = -3815493500625020183L;
         protected final long m_testTime;
         protected final String m_testDescription;
         protected final boolean m_testResult;
 
+        /**
+         * @param testTime time
+         * @param testDescription description
+         * @param result result
+         */
         public TestRecord(long testTime, String testDescription, boolean result) {
             m_testTime=testTime;
             m_testDescription=testDescription;
@@ -492,16 +500,25 @@ public class CountingMonitor extends TableauMonitorAdapter {
         @Override
         public int compareTo(TestRecord that) {
             if (this==that) return 0;
-            int result=((Long)that.m_testTime).compareTo(m_testTime);
+            int result=Long.compare(that.m_testTime,m_testTime);
             if (result!=0) return result;
             else return this.m_testDescription.compareToIgnoreCase(that.m_testDescription);
         }
+        /**
+         * @return test time
+         */
         public long getTestTime() {
             return m_testTime;
         }
+        /**
+         * @return test description
+         */
         public String getTestDescription() {
             return m_testDescription;
         }
+        /**
+         * @return test result
+         */
         public boolean getTestResult() {
             return m_testResult;
         }

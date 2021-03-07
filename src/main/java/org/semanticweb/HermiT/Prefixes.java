@@ -22,10 +22,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,17 +49,18 @@ public class Prefixes implements Serializable {
     protected static final String PN_CHARS="[A-Za-z0-9_\\u002D\\u00B7\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0300-\\u036F\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u203F-\\u2040\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD]";
     protected static final Pattern s_localNameChecker=Pattern.compile("("+PN_CHARS_BASE+"|_|[0-9])(("+PN_CHARS+"|[.])*("+PN_CHARS+"))?");
     /**semantic prefixes*/
-    public static final Map<String,String> s_semanticWebPrefixes;
-    static {
-        s_semanticWebPrefixes=new HashMap<>();
-        s_semanticWebPrefixes.put("rdf:","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        s_semanticWebPrefixes.put("rdfs:","http://www.w3.org/2000/01/rdf-schema#");
-        s_semanticWebPrefixes.put("owl:","http://www.w3.org/2002/07/owl#");
-        s_semanticWebPrefixes.put("xsd:","http://www.w3.org/2001/XMLSchema#");
-        s_semanticWebPrefixes.put("swrl:","http://www.w3.org/2003/11/swrl#");
-        s_semanticWebPrefixes.put("swrlb:","http://www.w3.org/2003/11/swrlb#");
-        s_semanticWebPrefixes.put("swrlx:","http://www.w3.org/2003/11/swrlx#");
-        s_semanticWebPrefixes.put("ruleml:","http://www.w3.org/2003/11/ruleml#");
+    public static final Map<String,String> s_semanticWebPrefixes = semanticPrefixes();
+    static Map<String,String> semanticPrefixes() {
+        Map<String,String> semanticWebPrefixes=new ConcurrentHashMap<>(12, 0.75F, 1);
+        semanticWebPrefixes.put("rdf:","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+        semanticWebPrefixes.put("rdfs:","http://www.w3.org/2000/01/rdf-schema#");
+        semanticWebPrefixes.put("owl:","http://www.w3.org/2002/07/owl#");
+        semanticWebPrefixes.put("xsd:","http://www.w3.org/2001/XMLSchema#");
+        semanticWebPrefixes.put("swrl:","http://www.w3.org/2003/11/swrl#");
+        semanticWebPrefixes.put("swrlb:","http://www.w3.org/2003/11/swrlb#");
+        semanticWebPrefixes.put("swrlx:","http://www.w3.org/2003/11/swrlx#");
+        semanticWebPrefixes.put("ruleml:","http://www.w3.org/2003/11/ruleml#");
+        return semanticWebPrefixes;
     }
     /**standard prefixes*/
     public static final Prefixes STANDARD_PREFIXES=new ImmutablePrefixes(s_semanticWebPrefixes);
@@ -77,12 +78,7 @@ public class Prefixes implements Serializable {
     protected void buildPrefixIRIMatchingPattern() {
         List<String> list=new ArrayList<>(m_prefixNamesByPrefixIRI.keySet());
         // Sort the prefix IRIs, longest first
-        Collections.sort(list,new Comparator<String>() {
-            @Override
-            public int compare(String lhs,String rhs) {
-                return rhs.length()-lhs.length();
-            }
-        });
+        Collections.sort(list,Comparator.comparing(String::length).reversed());
         StringBuilder pattern=new StringBuilder("^(");
         boolean didOne=false;
         for (String prefixIRI : list) {
@@ -150,6 +146,8 @@ public class Prefixes implements Serializable {
     }
     /**
      * Checks whether the given IRI can be expanded
+     * @param iri iri to check
+     * @return  true if expandable
      */
     public boolean canBeExpanded(String iri) {
         if (iri.length()>0 && iri.charAt(0)=='<')
@@ -196,6 +194,10 @@ public class Prefixes implements Serializable {
     public Map<String,String> getPrefixIRIsByPrefixName() {
         return java.util.Collections.unmodifiableMap(m_prefixIRIsByPrefixName);
     }
+    /**
+     * @param prefixName name
+     * @return iri
+     */
     public String getPrefixIRI(String prefixName) {
         return m_prefixIRIsByPrefixName.get(prefixName);
     }
@@ -292,9 +294,25 @@ public class Prefixes implements Serializable {
         return s_localNameChecker.matcher(localName).matches();
     }
 
+    /**
+     * Expands a full IRI from the abbreviated one, which is of one of the following forms:
+     * 'prefix:name', where 'prefix' is a registered prefix name (can be empty), or
+     * '&lt;iri&gt;', where 'iri' is an IRI.
+     * @param abbreviation input
+     * @return expanded string
+     */
+    public static String expandAbbreviation(String abbreviation) {
+        return Prefixes.STANDARD_PREFIXES.expandAbbreviatedIRI(abbreviation);
+    }
+    /**
+     * Immutable prefixes.
+     */
     public static class ImmutablePrefixes extends Prefixes {
         private static final long serialVersionUID=8517988865445255837L;
 
+        /**
+         * @param initialPrefixes prefixes
+         */
         public ImmutablePrefixes(Map<String,String> initialPrefixes) {
             for (Map.Entry<String,String> entry : initialPrefixes.entrySet())
                 super.declarePrefixRaw(entry.getKey(),entry.getValue());

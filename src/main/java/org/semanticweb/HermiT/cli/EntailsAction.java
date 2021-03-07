@@ -10,7 +10,7 @@ class EntailsAction implements Action {
 
     final IRI conclusionIRI;
 
-    public EntailsAction(Configuration config,IRI conclusionIRI) {
+    public EntailsAction(IRI conclusionIRI) {
         this.conclusionIRI=conclusionIRI;
     }
     @Override
