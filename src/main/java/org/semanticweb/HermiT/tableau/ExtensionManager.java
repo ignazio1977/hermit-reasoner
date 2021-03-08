@@ -18,9 +18,8 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -34,6 +33,9 @@ import org.semanticweb.HermiT.model.InternalDatatype;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
+
+import com.carrotsearch.hppcrt.maps.IntObjectHashMap;
+
 /**ExtensionManager.*/
 public final class ExtensionManager implements Serializable {
     private static final long serialVersionUID=5900300914631070591L;
@@ -41,7 +43,7 @@ public final class ExtensionManager implements Serializable {
     protected final Tableau m_tableau;
     protected final TableauMonitor m_tableauMonitor;
     protected final DependencySetFactory m_dependencySetFactory;
-    protected final Map<Integer,ExtensionTable> m_extensionTablesByArity;
+    protected final IntObjectHashMap<ExtensionTable> m_extensionTablesByArity;
     protected final ExtensionTable[] m_allExtensionTablesArray;
     protected final ExtensionTable m_binaryExtensionTable;
     protected final ExtensionTable m_ternaryExtensionTable;
@@ -61,7 +63,7 @@ public final class ExtensionManager implements Serializable {
         m_tableau=tableau;
         m_tableauMonitor=m_tableau.m_tableauMonitor;
         m_dependencySetFactory=m_tableau.m_dependencySetFactory;
-        m_extensionTablesByArity=new HashMap<>();
+        m_extensionTablesByArity=new IntObjectHashMap<>();
         m_binaryExtensionTable=
             new ExtensionTableWithTupleIndexes(m_tableau,2,!m_tableau.isDeterministic(),
                 new TupleIndex[] {
@@ -80,7 +82,7 @@ public final class ExtensionManager implements Serializable {
                     return ((Node)m_tupleTable.getTupleObject(tupleIndex,1)).isActive();
                 }
             };
-        m_extensionTablesByArity.put(Integer.valueOf(2),m_binaryExtensionTable);
+        m_extensionTablesByArity.put(2,m_binaryExtensionTable);
         m_ternaryExtensionTable=
             new ExtensionTableWithTupleIndexes(m_tableau,3,!m_tableau.isDeterministic(),
                 new TupleIndex[] {
@@ -101,9 +103,9 @@ public final class ExtensionManager implements Serializable {
                         && ((Node)m_tupleTable.getTupleObject(tupleIndex,2)).isActive();
                 }
             };
-        m_extensionTablesByArity.put(Integer.valueOf(3),m_ternaryExtensionTable);
+        m_extensionTablesByArity.put(3,m_ternaryExtensionTable);
         for (DescriptionGraph descriptionGraph : m_tableau.m_permanentDLOntology.getAllDescriptionGraphs()) {
-            Integer arityInteger=Integer.valueOf(descriptionGraph.getNumberOfVertices()+1);
+            int arityInteger=descriptionGraph.getNumberOfVertices()+1;
             if (!m_extensionTablesByArity.containsKey(arityInteger))
                 m_extensionTablesByArity.put(arityInteger,new ExtensionTableWithFullIndex(m_tableau,descriptionGraph.getNumberOfVertices()+1,!m_tableau.isDeterministic()));
         }
@@ -180,14 +182,14 @@ public final class ExtensionManager implements Serializable {
         case 3:
             return m_ternaryExtensionTable;
         default:
-            return m_extensionTablesByArity.get(Integer.valueOf(arity));
+            return m_extensionTablesByArity.get(arity);
         }
     }
     /**
      * @return extension tables
      */
     public Collection<ExtensionTable> getExtensionTables() {
-        return m_extensionTablesByArity.values();
+        return Arrays.asList((ExtensionTable[])m_extensionTablesByArity.values);
     }
     /**
      * @return true if changes are created

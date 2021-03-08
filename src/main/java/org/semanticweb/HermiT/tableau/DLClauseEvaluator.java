@@ -37,6 +37,10 @@ import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
+
+import com.carrotsearch.hppcrt.lists.IntArrayList;
+import com.carrotsearch.hppcrt.maps.IntObjectHashMap;
+
 /**DLClauseEvaluator*/
 public class DLClauseEvaluator implements Serializable {
     private static final long serialVersionUID=4639844159658590456L;
@@ -146,24 +150,22 @@ public class DLClauseEvaluator implements Serializable {
     /**BufferSupply.*/
     public static class BufferSupply {
         protected final List<Object[]> m_allBuffers=new ArrayList<>();
-        protected final Map<Integer,List<Object[]>> m_availableBuffersByArity=new HashMap<>();
+        protected final IntObjectHashMap<List<Object[]>> m_availableBuffersByArity=new IntObjectHashMap<>();
 
         void reuseBuffers() {
             m_availableBuffersByArity.clear();
             for (Object[] buffer : m_allBuffers) {
-                Integer arityInteger=Integer.valueOf(buffer.length);
-                List<Object[]> buffers=m_availableBuffersByArity.get(arityInteger);
+                List<Object[]> buffers=m_availableBuffersByArity.get(buffer.length);
                 if (buffers==null) {
                     buffers=new ArrayList<>();
-                    m_availableBuffersByArity.put(arityInteger,buffers);
+                    m_availableBuffersByArity.put(buffer.length,buffers);
                 }
                 buffers.add(buffer);
             }
         }
         Object[] getBuffer(int arity) {
             Object[] buffer;
-            Integer arityInteger=Integer.valueOf(arity);
-            List<Object[]> buffers=m_availableBuffersByArity.get(arityInteger);
+            List<Object[]> buffers=m_availableBuffersByArity.get(arity);
             if (buffers==null || buffers.isEmpty()) {
                 buffer=new Object[arity];
                 m_allBuffers.add(buffer);
@@ -872,7 +874,7 @@ public class DLClauseEvaluator implements Serializable {
         protected final List<ExtensionTable.Retrieval> m_retrievals;
         /**Workers.*/
         public final List<Worker> m_workers;
-        protected final List<Integer> m_labels;
+        protected final IntArrayList m_labels;
 
         /**
          * @param bufferSupply bufferSupply
@@ -916,10 +918,10 @@ public class DLClauseEvaluator implements Serializable {
                 m_unionDependencySet=null;
             m_retrievals=new ArrayList<>();
             m_workers=new ArrayList<>();
-            m_labels=new ArrayList<>();
+            m_labels=new IntArrayList();
         }
         protected final void generateCode(int firstBodyAtomToCompile,ExtensionTable.Retrieval firstAtomRetrieval) {
-            m_labels.add(null);
+            m_labels.add(0);
             m_retrievals.add(firstAtomRetrieval);
             int afterRule=addLabel();
             if (firstBodyAtomToCompile>0) {
@@ -935,7 +937,7 @@ public class DLClauseEvaluator implements Serializable {
                     BranchingWorker branchingWorker=(BranchingWorker)worker;
                     int branchingAddress=branchingWorker.getBranchingAddress();
                     if (branchingAddress<0) {
-                        int resolvedAddress=m_labels.get(-branchingAddress).intValue();
+                        int resolvedAddress=m_labels.get(-branchingAddress);
                         branchingWorker.setBranchingAddress(resolvedAddress);
                     }
                 }
@@ -1047,11 +1049,11 @@ public class DLClauseEvaluator implements Serializable {
         }
         protected final int addLabel() {
             int labelIndex=m_labels.size();
-            m_labels.add(null);
+            m_labels.add(0);
             return -labelIndex;
         }
         protected final void setLabelProgramCounter(int labelID) {
-            m_labels.set(-labelID,Integer.valueOf(m_workers.size()));
+            m_labels.set(-labelID,m_workers.size());
         }
         protected abstract void compileHeads();
    }
